@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">木木弹琴</string>
+    <string name="instructions">本服务由木木弹琴提供</string>
+    <string name="title_activity_import_file">导入琴谱</string>
+</resources>
