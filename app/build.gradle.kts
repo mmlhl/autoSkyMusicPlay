@@ -6,7 +6,6 @@ plugins {
 android {
     namespace = "me.mm.sky.auto.music"
     compileSdk = 34
-
     defaultConfig {
         applicationId = "me.mm.sky.auto.music"
         minSdk = 24
