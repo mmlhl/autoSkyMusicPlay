@@ -1,5 +1,15 @@
 <resources>
-    <string name="app_name">木木弹琴</string>
-    <string name="instructions">本服务由木木弹琴提供</string>
-    <string name="title_activity_import_file">导入琴谱</string>
+    <string name="app_name">sky auto player</string>
+    <string name="instructions">This service is provided by sky auto player</string>
+    <string name="title_activity_import_file">import sky sheet</string>
+    <string name="Acc_pms_title">Accessibility permissions Switch</string>
+    <string name="Acc_pms_des">We need you to grant accessibility permissions for automatic clicks</string>
+    <string name="Acc_pms_action_btm_title">authorized</string>
+    <string name="test" translatable="false">authorized</string>
+    <string name="music_screen_title">Music</string>
+    <string name="home_screen_title">Home</string>
+    <string name="setting_screen_title">Setting</string>
+    <string name="notification_pms_title">Notification Grand</string>
+    <string name="notification_pms_des">We need Notification Grand sa that we can show you message when app is in background</string>
+    <string name="notification_pms_action_btm_title">authorized</string>
 </resources>

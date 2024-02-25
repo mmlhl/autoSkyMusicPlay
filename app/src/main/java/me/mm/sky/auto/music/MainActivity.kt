@@ -13,56 +13,62 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.BottomAppBarDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import me.mm.sky.auto.music.service.HolderService
 import me.mm.sky.auto.music.service.MyService
 import me.mm.sky.auto.music.tools.AccessibilityUtils
+import me.mm.sky.auto.music.ui.HomeScreen
+import me.mm.sky.auto.music.ui.data.MainScreenViewModel
+import me.mm.sky.auto.music.ui.homepage.HomeScreenPage
+import me.mm.sky.auto.music.ui.manager.MyNavHost
 import me.mm.sky.auto.music.ui.theme.木木弹琴Theme
 
+
 class MainActivity : ComponentActivity() {
+
     override fun onResume() {
         super.onResume()
-        if (HolderService.holderService == null) {
-            val intent = Intent(this@MainActivity, HolderService::class.java)
-            startService(intent)
-        }
-        if (!MyService.isStart()) {
-            try {
-                if (AccessibilityUtils.isRooted()) {
-                    return
-                }
-                val builder = AlertDialog.Builder(this)
-                builder.setTitle("权限申请").setMessage("本软件需要辅助权限以实现自动点击屏幕")
-                    .setCancelable(false)
-                    .setNegativeButton(
-                        "我先看看"
-                    ) { dialogInterface, i -> }
-                    .setPositiveButton(
-                        "确认"
-                    ) { dialogInterface: DialogInterface?, i: Int ->
-                        this@MainActivity.startActivity(
-                            Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                        )
-                    }
-                    .setNeutralButton(
-                        "进群了解"
-                    ) { dialogInterface, i -> joinQQGroup("SzGQPWDd8JMFfqV9q7ZEGTiSe3DjzEYk") }
-                    .show()
-            } catch (e: Exception) {
-                this.startActivity(Intent(Settings.ACTION_SETTINGS))
-                e.printStackTrace()
-            }
-        }
-
+        MainScreenViewModel.updateIsNotificationGranted(NotificationManagerCompat.from(this).areNotificationsEnabled())
     }
 
     fun joinQQGroup(key: String): Boolean {
@@ -79,46 +85,100 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        if (!AccessibilityUtils.isAccessibilityServiceEnabled("me.mm.sky.auto.music/.service.MyService")) {
-            AccessibilityUtils.enableAccessibilityService("me.mm.sky.auto.music/.service.MyService")
+        if (HolderService.holderService == null) {
+            val intent = Intent(this@MainActivity, HolderService::class.java)
+            startService(intent)
         }
+        super.onCreate(savedInstanceState)
+//        if (!AccessibilityUtils.isAccessibilityServiceEnabled("me.mm.sky.auto.music/.service.MyService")) {
+//            AccessibilityUtils.enableAccessibilityService("me.mm.sky.auto.music/.service.MyService")
+//        }
         requestPermission(this)
 
         setContent {
             木木弹琴Theme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
-                }
+                val navController = rememberNavController()
+                MainActivityRootView(navController)
             }
         }
 
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Column {
-        Text(
-            text = "Hello $name!",
-            modifier = modifier
-        )
-        Text(text = "nh")
-    }
 
 }
 
-@Preview(
-    showBackground = true
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GreetingPreview() {
-    木木弹琴Theme {
-        Greeting("Android")
+fun MainActivityRootView(navController: NavHostController) {
+    val mainScreenViewModel: MainScreenViewModel = viewModel()
+    val uiState = mainScreenViewModel.uiState.collectAsState().value
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        bottomBar = {
+            BottomAppBar (
+
+            ){
+                NavigationBar(
+
+                ){
+                    uiState.screens.forEach { screen ->
+                        NavigationBarItem(
+                            icon = {
+                                Icon(
+                                    imageVector = screen.icon,
+                                    contentDescription = null
+                                )
+                            },
+                            label = {
+                                Text(
+                                    stringResource(id = screen.title),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            },
+                            selected = uiState.currentScreen == screen,
+                            onClick = {
+                                if (uiState.currentScreen == screen) {
+                                    return@NavigationBarItem
+                                }
+                                mainScreenViewModel.updateCurrentScreen(screen)
+                                navController.navigate(screen.route)
+                            }
+                        )
+                    }
+                }
+            }
+        },
+        topBar = {
+            CenterAlignedTopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
+                title = {
+                    Text(
+                        stringResource(id = uiState.currentScreen.title),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                actions = {
+                    IconButton(onClick = {
+                        //展示一个菜单
+
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Menu,
+                            contentDescription = "Localized description"
+                        )
+                    }
+                },
+                scrollBehavior = scrollBehavior
+            )
+        }
+    ) { padding ->
+        MyNavHost(navHostController = navController, modifier = Modifier.padding(padding))
     }
 }
 
