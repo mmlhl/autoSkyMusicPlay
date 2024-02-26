@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import me.mm.sky.auto.music.ui.HomeScreen
+import me.mm.sky.auto.music.ui.musicpage.MusicScreenPage
 import me.mm.sky.auto.music.ui.homepage.HomeScreenPage
 
 @Composable
@@ -15,7 +16,7 @@ fun MyNavHost(navHostController: NavHostController,modifier: Modifier) {
             HomeScreenPage()
         }
         composable(HomeScreen.MUSIC.route){
-            //SearchScreenPage()
+            MusicScreenPage()
         }
         composable(HomeScreen.SETTINGS.route){
             //SettingsScreenPage()

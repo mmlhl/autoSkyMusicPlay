@@ -10,6 +10,7 @@ import me.mm.sky.auto.music.ui.HomeScreen
 object MainScreenViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     var uiState = _uiState
+
     fun updateSettingItem(item: SettingItem, value: Any) {
         _uiState.value = _uiState.value.copy(
             settingItems = _uiState.value.settingItems.map {
@@ -24,6 +25,9 @@ object MainScreenViewModel : ViewModel() {
     }
     fun updateIsAccGranted(isGranted: Boolean) {
         _uiState.value = _uiState.value.copy(isAccGranted = isGranted)
+    }
+    fun updateIsFloatWindowGranted(isGranted: Boolean) {
+        _uiState.value = _uiState.value.copy(isFloatWindowGranted = isGranted)
     }
     fun updateCurrentScreen(homeScreen: HomeScreen) {
         //如果当前的屏幕是homeScreen，那么就不需要更新

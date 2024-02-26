@@ -66,6 +66,18 @@ fun HomeScreenPage(
                 }
             )
         }
+        if (!uiState.isFloatWindowGranted) {
+            ActionCard(
+                ActionCardItem(
+                    R.string.float_window_pms_title, R.string.float_window_pms_des,
+                    R.string.float_window_pms_action_btm_title, Icons.Default.Add
+                ) {
+                    val intent = Intent (Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    HolderService.holderService?.startActivity(intent)
+                }
+            )
+        }
 
         uiState.settingItems.forEach { settingItem ->
             ItemView(

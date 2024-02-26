@@ -1,8 +1,6 @@
 package me.mm.sky.auto.music
 
 import android.Manifest
-import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -10,36 +8,23 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -56,10 +41,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import me.mm.sky.auto.music.service.HolderService
 import me.mm.sky.auto.music.service.MyService
-import me.mm.sky.auto.music.tools.AccessibilityUtils
-import me.mm.sky.auto.music.ui.HomeScreen
 import me.mm.sky.auto.music.ui.data.MainScreenViewModel
-import me.mm.sky.auto.music.ui.homepage.HomeScreenPage
 import me.mm.sky.auto.music.ui.manager.MyNavHost
 import me.mm.sky.auto.music.ui.theme.木木弹琴Theme
 
@@ -68,7 +50,19 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        MainScreenViewModel.updateIsNotificationGranted(NotificationManagerCompat.from(this).areNotificationsEnabled())
+        if (HolderService.holderService == null) {
+            val intent = Intent(this@MainActivity, HolderService::class.java)
+            startService(intent)
+
+        }
+        MainScreenViewModel.updateIsFloatWindowGranted(HolderService.getIsFloatWindowGranted(this))
+        MainScreenViewModel.updateIsNotificationGranted(
+            NotificationManagerCompat.from(this).areNotificationsEnabled()
+        )
+        val am: AccessibilityManager = getSystemService(ACCESSIBILITY_SERVICE) as AccessibilityManager
+        val isAccessibilityEnabled_flag: Boolean = am.isEnabled
+        MainScreenViewModel.updateIsAccGranted(isAccessibilityEnabled_flag)
+
     }
 
     fun joinQQGroup(key: String): Boolean {
@@ -85,20 +79,17 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (HolderService.holderService == null) {
-            val intent = Intent(this@MainActivity, HolderService::class.java)
-            startService(intent)
-        }
+
         super.onCreate(savedInstanceState)
 //        if (!AccessibilityUtils.isAccessibilityServiceEnabled("me.mm.sky.auto.music/.service.MyService")) {
 //            AccessibilityUtils.enableAccessibilityService("me.mm.sky.auto.music/.service.MyService")
 //        }
         requestPermission(this)
-
         setContent {
             木木弹琴Theme {
                 val navController = rememberNavController()
                 MainActivityRootView(navController)
+
             }
         }
 
@@ -116,12 +107,12 @@ fun MainActivityRootView(navController: NavHostController) {
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         bottomBar = {
-            BottomAppBar (
+            BottomAppBar(
 
-            ){
+            ) {
                 NavigationBar(
 
-                ){
+                ) {
                     uiState.screens.forEach { screen ->
                         NavigationBarItem(
                             icon = {
@@ -170,7 +161,7 @@ fun MainActivityRootView(navController: NavHostController) {
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Menu,
-                            contentDescription = "Localized description"
+                            contentDescription = stringResource(id = R.string.menu)
                         )
                     }
                 },
