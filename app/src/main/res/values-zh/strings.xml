@@ -16,4 +16,11 @@
     <string name="float_window_pms_title">悬浮窗权限</string>
     <string name="float_window_pms_des">我需要打开悬浮窗权限，以便于在其他软件上控制弹琴进度</string>
     <string name="float_window_pms_action_btm_title">授权</string>
+    <string name="root_auto_acc_title">自动授权</string>
+    <string name="root_auto_acc_des">拥有root权限时，自动开启无障碍权限</string>
+    <string name="start_service_title">启动服务</string>
+    <string name="start_service_des">启动服务，然后你可以转到光遇进行弹琴</string>
+    <string name="start_service_action">开始</string>
+    <string name="hide_task_title">隐藏后台</string>
+    <string name="hide_task_des">将本app从最近任务中隐藏</string>
 </resources>

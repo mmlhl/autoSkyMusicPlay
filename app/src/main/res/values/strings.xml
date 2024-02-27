@@ -15,4 +15,11 @@
     <string name="float_window_pms_title">Float Window</string>
     <string name="float_window_pms_des">We need float window grand so that you can control this app over other app.</string>
     <string name="float_window_pms_action_btm_title">authorized</string>
+    <string name="root_auto_acc_title">Auto Grant</string>
+    <string name="root_auto_acc_des">When app got root,auto get the Accessibility grant</string>
+    <string name="start_service_title">Start Service</string>
+    <string name="start_service_des">Start service then you can select a sheet and auto play in sky.</string>
+    <string name="start_service_action">Start</string>
+    <string name="hide_task_title">Hide Task</string>
+    <string name="hide_task_des">Hide this app from recent task</string>
 </resources>

@@ -2,10 +2,12 @@ package me.mm.sky.auto.music.ui.data
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import me.mm.sky.auto.music.service.HolderService.Companion.editString
-import me.mm.sky.auto.music.service.HolderService.Companion.editBoolean
-import me.mm.sky.auto.music.service.HolderService.Companion.editInt
+import me.mm.sky.auto.music.context.MyContext.Companion.editBoolean
+import me.mm.sky.auto.music.context.MyContext.Companion.editInt
+import me.mm.sky.auto.music.context.MyContext.Companion.editString
 import me.mm.sky.auto.music.ui.HomeScreen
+import me.mm.sky.auto.music.ui.setting.SettingItem
+import me.mm.sky.auto.music.ui.setting.SettingType
 
 object MainScreenViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
@@ -43,14 +45,18 @@ object MainScreenViewModel : ViewModel() {
 
     private fun saveSetting(item: SettingItem, value: Any) {
         when (item.type) {
-            Boolean::class.java -> {
+            SettingType.BOOLEAN -> {
                 editBoolean(item.key, value as Boolean)
             }
-            String::class.java -> {
+            SettingType.STRING -> {
                 editString(item.key, value as String)
             }
-            Int::class.java -> {
+            SettingType.INT -> {
                 editInt(item.key, value as Int)
+            }
+
+            SettingType.SELECT -> {
+                editString(item.key, value as String)
             }
         }
     }

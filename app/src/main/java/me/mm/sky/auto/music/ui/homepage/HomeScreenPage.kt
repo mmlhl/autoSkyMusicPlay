@@ -20,11 +20,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.mm.sky.auto.music.R
+import me.mm.sky.auto.music.context.MyContext.Companion.context
 import me.mm.sky.auto.music.service.HolderService
 import me.mm.sky.auto.music.ui.ActionCard
 import me.mm.sky.auto.music.ui.ActionCardItem
 import me.mm.sky.auto.music.ui.data.MainScreenViewModel
-import me.mm.sky.auto.music.ui.data.SettingItem
+import me.mm.sky.auto.music.ui.setting.SettingItem
+import me.mm.sky.auto.music.ui.setting.SettingItemView
 
 @Composable
 fun HomeScreenPage(
@@ -44,7 +46,7 @@ fun HomeScreenPage(
                     //跳转无障碍设置
                     val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    HolderService.holderService?.startActivity(intent)
+                    context.startActivity(intent)
 
                 }
             )
@@ -55,7 +57,6 @@ fun HomeScreenPage(
                     R.string.notification_pms_title, R.string.notification_pms_des,
                     R.string.notification_pms_action_btm_title, Icons.Default.Add
                 ) {
-                    val context = HolderService.holderService ?: return@ActionCardItem
                     val intent = Intent()
                     intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS")
                     intent.putExtra("app_package", context.packageName)
@@ -74,55 +75,27 @@ fun HomeScreenPage(
                 ) {
                     val intent = Intent (Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    HolderService.holderService?.startActivity(intent)
+                    context.startActivity(intent)
+                }
+            )
+        }
+        if (uiState.isAccGranted && uiState.isFloatWindowGranted && uiState.isNotificationGranted) {
+            ActionCard(
+                ActionCardItem(
+                    R.string.start_service_title, R.string.start_service_des,
+                    R.string.start_service_action, Icons.Default.Add
+                ) {
+                    val intent = Intent(context, HolderService::class.java)
+                    context.startService(intent)
                 }
             )
         }
 
-        uiState.settingItems.forEach { settingItem ->
-            ItemView(
+        uiState.homeSettingItems.forEach { settingItem ->
+            SettingItemView(
                 item = settingItem,
                 modifier = Modifier.fillMaxWidth(),
-                mainScreenViewModel = mainScreenViewModel
             )
-        }
-    }
-}
-@Composable
-fun ItemView(item: SettingItem, modifier: Modifier, mainScreenViewModel: MainScreenViewModel) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-    ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(8.dp)
-        ) {
-            Text(text = stringResource(item.title), fontSize = MaterialTheme.typography.titleMedium.fontSize)
-            Text(text = stringResource(item.description), fontSize = MaterialTheme.typography.bodySmall.fontSize, color = MaterialTheme.colorScheme.error)
-        }
-        Box (
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-        ){
-            when (item.type) {
-                Boolean::class.java -> {
-                    Switch(
-                        checked = item.value as Boolean,
-                        onCheckedChange = { isChecked ->
-                            mainScreenViewModel.updateSettingItem(item, isChecked)
-                        }
-                    )
-                }
-                String::class.java -> {
-                    Text(text = item.value as String)
-                }
-                Int::class.java -> {
-                    Text(text = (item.value as Int).toString())
-                }
-            }
         }
     }
 }

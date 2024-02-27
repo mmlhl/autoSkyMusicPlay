@@ -3,8 +3,8 @@ package me.mm.sky.auto.music.service
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
 import android.view.accessibility.AccessibilityEvent
-import androidx.lifecycle.MutableLiveData
-import me.mm.sky.auto.music.service.HolderService.Companion.toast
+import me.mm.sky.auto.music.context.MyContext.Companion.toast
+
 import me.mm.sky.auto.music.ui.data.MainScreenViewModel
 
 class MyService : AccessibilityService() {

@@ -39,6 +39,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import me.mm.sky.auto.music.context.MyContext.Companion.getIsFloatWindowGranted
+import me.mm.sky.auto.music.context.MyContext.Companion.isAccessibilityEnabled
 import me.mm.sky.auto.music.service.HolderService
 import me.mm.sky.auto.music.service.MyService
 import me.mm.sky.auto.music.ui.data.MainScreenViewModel
@@ -55,13 +57,11 @@ class MainActivity : ComponentActivity() {
             startService(intent)
 
         }
-        MainScreenViewModel.updateIsFloatWindowGranted(HolderService.getIsFloatWindowGranted(this))
+        MainScreenViewModel.updateIsFloatWindowGranted(getIsFloatWindowGranted())
         MainScreenViewModel.updateIsNotificationGranted(
             NotificationManagerCompat.from(this).areNotificationsEnabled()
         )
-        val am: AccessibilityManager = getSystemService(ACCESSIBILITY_SERVICE) as AccessibilityManager
-        val isAccessibilityEnabled_flag: Boolean = am.isEnabled
-        MainScreenViewModel.updateIsAccGranted(isAccessibilityEnabled_flag)
+
 
     }
 
