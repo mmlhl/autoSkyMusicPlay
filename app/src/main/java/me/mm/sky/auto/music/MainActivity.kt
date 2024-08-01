@@ -8,7 +8,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
-import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,15 +39,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import me.mm.sky.auto.music.context.MyContext.Companion.getIsFloatWindowGranted
-import me.mm.sky.auto.music.context.MyContext.Companion.isAccessibilityEnabled
+import me.mm.sky.auto.music.context.MyContext.Companion.updateHideTask
 import me.mm.sky.auto.music.service.HolderService
-import me.mm.sky.auto.music.service.MyService
 import me.mm.sky.auto.music.ui.data.MainScreenViewModel
 import me.mm.sky.auto.music.ui.manager.MyNavHost
 import me.mm.sky.auto.music.ui.theme.木木弹琴Theme
 
 
 class MainActivity : ComponentActivity() {
+    companion object {
+        var activity: ComponentActivity? = null
+    }
 
     override fun onResume() {
         super.onResume()
@@ -78,15 +79,24 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onPause() {
+        super.onPause()
+        updateHideTask()
+    }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        activity = this
+        if (HolderService.holderService == null) {
+            val intent = Intent(this@MainActivity, HolderService::class.java)
+            startService(intent)
+
+        }
         super.onCreate(savedInstanceState)
-//        if (!AccessibilityUtils.isAccessibilityServiceEnabled("me.mm.sky.auto.music/.service.MyService")) {
-//            AccessibilityUtils.enableAccessibilityService("me.mm.sky.auto.music/.service.MyService")
-//        }
+
         requestPermission(this)
         setContent {
             木木弹琴Theme {
+
                 val navController = rememberNavController()
                 MainActivityRootView(navController)
 
@@ -107,9 +117,7 @@ fun MainActivityRootView(navController: NavHostController) {
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         bottomBar = {
-            BottomAppBar(
 
-            ) {
                 NavigationBar(
 
                 ) {
@@ -139,7 +147,7 @@ fun MainActivityRootView(navController: NavHostController) {
                         )
                     }
                 }
-            }
+
         },
         topBar = {
             CenterAlignedTopAppBar(
@@ -157,6 +165,7 @@ fun MainActivityRootView(navController: NavHostController) {
                 actions = {
                     IconButton(onClick = {
                         //展示一个菜单
+
 
                     }) {
                         Icon(

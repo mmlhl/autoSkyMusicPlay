@@ -4,12 +4,15 @@ import android.app.ActivityManager
 import android.app.AppOpsManager
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
+import me.mm.auto.audio.list.database.AppDatabase
+import me.mm.sky.auto.music.floatwin.FloatingWindowService
 import me.mm.sky.auto.music.service.HolderService
 import me.mm.sky.auto.music.service.MyService
 import me.mm.sky.auto.music.tools.AccessibilityUtils
@@ -19,6 +22,8 @@ import me.mm.sky.auto.music.ui.setting.SettingItem
 
 class MyContext : Application() {
     companion object {
+        lateinit var database: AppDatabase
+        lateinit var floatingWindowService: FloatingWindowService
         lateinit var context: MyContext
         private val handler = Handler(Looper.getMainLooper())
         fun toast(msg: String) {
@@ -88,13 +93,29 @@ class MyContext : Application() {
                 task.setExcludeFromRecents(exclude)
             }
         }
+        fun updateHideTask() {
+            val uiState = MainScreenViewModel.uiState.value
+            uiState.settingItems.forEach {
+                when (it.key) {
+                    "hide_task" -> {
+                        hideTask(it.value as Boolean)
+                    }
+                }
+            }
+        }
 
     }
 
     override fun onCreate() {
         super.onCreate()
         context = this
+        database = AppDatabase.getInstance(context)
+        if (!FloatingWindowService.isServiceRunning()) {
+            context.startService(Intent(context, FloatingWindowService::class.java))
+        }
         val uiState = MainScreenViewModel.uiState.value
+
+        // 读取配置
         uiState.settingItems.forEach {
             when (it.key) {
                 "root_auto_acc" -> {
@@ -111,7 +132,7 @@ class MyContext : Application() {
                 }
             }
         }
-
+        // 根据开启的权限情况，更新HomeScreen内容
         MainScreenViewModel.uiState.value = uiState.copy(
             isFloatWindowGranted = getIsFloatWindowGranted(),
             isNotificationGranted = getIsNotificationGranted(),

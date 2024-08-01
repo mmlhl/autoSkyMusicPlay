@@ -2,10 +2,19 @@ package me.mm.sky.auto.music.service
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
+import android.graphics.Bitmap
+import android.media.Image
+import android.os.Build
+import android.view.Display
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
+import androidx.annotation.RequiresApi
+import me.mm.sky.auto.music.MainActivity
 import me.mm.sky.auto.music.context.MyContext.Companion.toast
-
 import me.mm.sky.auto.music.ui.data.MainScreenViewModel
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
+
 
 class MyService : AccessibilityService() {
 
@@ -16,7 +25,9 @@ class MyService : AccessibilityService() {
         }
 
         var myService: MyService? = null
+
     }
+
 
     override fun onServiceConnected() {
         super.onServiceConnected()
