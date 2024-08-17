@@ -80,8 +80,8 @@ class MyService : AccessibilityService() {
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
 
-        event.let {
-            when (event!!.eventType) {
+        event?.let {
+            when (event.eventType) {
                 AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
                     val rootNode = event.source
                     if (rootNode != null) {
