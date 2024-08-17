@@ -14,6 +14,7 @@ import me.mm.sky.auto.music.context.MyContext
 import me.mm.sky.auto.music.context.MyContext.Companion.toast
 import me.mm.sky.auto.music.sheet.utils.Key
 import me.mm.sky.auto.music.ui.data.MainScreenViewModel
+import me.mm.sky.auto.music.ui.data.music.MusicViewModel
 
 
 class MyService : AccessibilityService() {
@@ -26,6 +27,8 @@ class MyService : AccessibilityService() {
         var myService: MyService? = null
         suspend fun dispatchGestureClick(key: Key) = withContext(Dispatchers.IO) {
             if (myService == null) {
+                MusicViewModel.pause()
+                Toast.makeText(MyContext.context, "无障碍服务未在运行或故障，请重新授予无障碍权限", Toast.LENGTH_SHORT).show()
                 return@withContext
             }
             val builder = GestureDescription.Builder()
@@ -37,7 +40,8 @@ class MyService : AccessibilityService() {
         }
         fun dispatchGestureClickOnNewTh(key: Key){
             if (myService == null) {
-                Log.e("myService", "dispatchGestureClick: service is null")
+                MusicViewModel.pause()
+                Toast.makeText(MyContext.context, "无障碍服务未在运行或故障，请重新授予无障碍权限", Toast.LENGTH_SHORT).show()
                 return
             }
             Log.e("myService", "dispatchGestureClick: click ${key}")
@@ -50,6 +54,8 @@ class MyService : AccessibilityService() {
         }
         suspend fun dispatchGestureClick(keys: List<Key>) = withContext(Dispatchers.IO) {
             if (myService == null) {
+                MusicViewModel.pause()
+                Toast.makeText(MyContext.context, "无障碍服务未在运行或故障，请重新授予无障碍权限", Toast.LENGTH_SHORT).show()
                 return@withContext
             }
             val builder = GestureDescription.Builder()
