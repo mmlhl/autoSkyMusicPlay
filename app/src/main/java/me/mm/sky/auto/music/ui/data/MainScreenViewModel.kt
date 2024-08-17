@@ -16,7 +16,7 @@ import me.mm.sky.auto.music.ui.setting.SettingItem
 import me.mm.sky.auto.music.ui.setting.SettingType
 
 object MainScreenViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(UiState())
+    private val _uiState = MutableStateFlow(MainState())
     var uiState = _uiState
 
     fun updateSettingItem(item: SettingItem, value: Any) {
@@ -26,7 +26,9 @@ object MainScreenViewModel : ViewModel() {
                     "hide_task" -> {
                         MyContext.hideTask(value as Boolean)
                     }
+                    "hide_float" -> {
 
+                    }
                 }
                 if (it.key == item.key) {
                     saveSetting(item, value)

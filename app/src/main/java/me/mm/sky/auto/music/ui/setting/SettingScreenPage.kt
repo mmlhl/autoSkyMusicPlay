@@ -5,8 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.mm.sky.auto.music.ui.data.MainScreenViewModel
-import me.mm.sky.auto.music.ui.data.MainScreenViewModel.uiState
-import me.mm.sky.auto.music.ui.data.UiState
 
 @Composable
 fun SettingScreenPage() {

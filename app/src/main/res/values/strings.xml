@@ -24,4 +24,6 @@
     <string name="hide_task_des">Hide this app from recent task</string>
     <string name="stop_service_title">Service Started</string>
     <string name="stop_service_des">Stop Service</string>
+    <string name="hide_float_title"> Auto Stop And Hide Window</string>
+    <string name="hide_float_des">Auto Stop Play And Hide Window When Not Focus On Sky App.</string>
 </resources>
