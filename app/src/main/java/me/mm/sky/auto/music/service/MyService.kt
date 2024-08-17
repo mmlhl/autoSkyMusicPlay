@@ -12,6 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.mm.sky.auto.music.context.MyContext
 import me.mm.sky.auto.music.context.MyContext.Companion.toast
+import me.mm.sky.auto.music.floatwin.FloatSateEnum
+import me.mm.sky.auto.music.floatwin.FloatViewModel
 import me.mm.sky.auto.music.sheet.utils.Key
 import me.mm.sky.auto.music.ui.data.MainScreenViewModel
 import me.mm.sky.auto.music.ui.data.music.MusicViewModel
@@ -76,8 +78,32 @@ class MyService : AccessibilityService() {
         MainScreenViewModel.updateIsAccGranted(true)
     }
 
-    override fun onAccessibilityEvent(p0: AccessibilityEvent?) {
-//        Toast.makeText(MyContext.context, "1", Toast.LENGTH_SHORT).show()
+    override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+
+        event.let {
+            when (event!!.eventType) {
+                AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
+                    val rootNode = event.source
+                    if (rootNode != null) {
+                        val windowPackageName = rootNode.packageName
+                        windowPackageName.let {
+                            if (windowPackageName.contains(
+                                    "setting"
+                                ))return
+                            if (windowPackageName.contains(
+                                    "sky"
+                            )) {
+                                FloatViewModel.autoUnHideFloat()
+                            }
+                            else{
+                                FloatViewModel.autoHideFloat()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     }
 
 

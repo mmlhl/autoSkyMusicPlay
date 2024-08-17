@@ -19,6 +19,8 @@ import me.mm.sky.auto.music.ui.data.music.MusicViewModel
 @SuppressLint("StaticFieldLeak")
 object FloatViewModel : ViewModel() {
     private val _floatState = MutableStateFlow(FloatState())
+    //自动隐藏之前的浮窗状态
+    private val _hideState = MutableStateFlow(FloatSateEnum.FLOAT_NONE)
     private val _getLocationShowing = MutableStateFlow(false)
     private val nowAutoHide=MutableStateFlow(false)
     val getLocationShowing = _getLocationShowing
@@ -57,10 +59,22 @@ object FloatViewModel : ViewModel() {
         }
     }
 
+    fun autoHideFloat(){
+        viewModelScope.launch {
+            FloatingX.control("floating").hide()
+            FloatingX.control("smallIcon").hide()
+        }
+    }
+    fun autoUnHideFloat(){
+        viewModelScope.launch {
+            updateFloatState(_hideState.value)
+        }
+    }
     fun updateFloatState(floatSateEnum: FloatSateEnum) {
         _floatState.value = _floatState.value.copy(
             floatSateEnum = floatSateEnum
         )
+        _hideState.value = floatSateEnum
         viewModelScope.launch {
             when (floatSateEnum) {
                 FloatSateEnum.FLOAT_LIST -> {
