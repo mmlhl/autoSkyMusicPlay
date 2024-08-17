@@ -24,4 +24,5 @@
 }
 -keep class me.mm.sky.auto.music.context.MyContext{
 *;
+
 }
