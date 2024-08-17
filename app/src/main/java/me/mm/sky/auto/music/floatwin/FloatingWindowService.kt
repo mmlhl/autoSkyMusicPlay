@@ -26,6 +26,7 @@ import com.petterp.floatingx.compose.enableComposeSupport
 import com.petterp.floatingx.listener.IFxTouchListener
 import com.petterp.floatingx.listener.control.IFxAppControl
 import com.petterp.floatingx.view.IFxInternalHelper
+import me.mm.sky.auto.music.MainActivity
 import me.mm.sky.auto.music.R
 import me.mm.sky.auto.music.context.MyContext
 
