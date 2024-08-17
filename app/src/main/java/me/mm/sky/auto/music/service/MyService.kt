@@ -101,6 +101,110 @@ class MyService : AccessibilityService() {
                         }
                     }
                 }
+
+                AccessibilityEvent.TYPE_ANNOUNCEMENT -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_ASSIST_READING_CONTEXT -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_GESTURE_DETECTION_END -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_GESTURE_DETECTION_START -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_SPEECH_STATE_CHANGE -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_TOUCH_INTERACTION_END -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_TOUCH_INTERACTION_START -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_VIEW_CLICKED -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_VIEW_CONTEXT_CLICKED -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_VIEW_FOCUSED -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_VIEW_HOVER_ENTER -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_VIEW_HOVER_EXIT -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_VIEW_LONG_CLICKED -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_VIEW_SCROLLED -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_VIEW_SELECTED -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_VIEW_TARGETED_BY_SCROLL -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_WINDOWS_CHANGED -> {
+                    TODO()
+                }
+
+                AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
+                    TODO()
+                }
             }
         }
 
