@@ -1,6 +1,7 @@
 package me.mm.sky.auto.music.floatwin
 
 import android.annotation.SuppressLint
+import android.graphics.Rect
 import android.view.ContextThemeWrapper
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
@@ -23,7 +24,18 @@ object FloatViewModel : ViewModel() {
     val getLocationShowing = _getLocationShowing
     private val _noRemainMeAgain = MutableStateFlow(MyContext.getBoolean("noRemainMeAgain", false))
     val floatState = _floatState
+    private lateinit var keyBoardRect:Rect
 
+    fun updateKeyboardRect(x0:Int,y0:Int,x1:Int,y1:Int){
+        viewModelScope.launch {
+            keyBoardRect=Rect(x0,y0,x1,y1)
+        }
+    }
+    //判断矩形是否重合
+    fun areRectOverlapping(rect1: Rect, rect2: Rect): Boolean {
+        return rect1.left < rect2.right && rect1.right > rect2.left &&
+                rect1.top < rect2.bottom && rect1.bottom > rect2.top
+    }
 
     fun updateLocationShowing(isShowing: Boolean) {
         viewModelScope.launch {

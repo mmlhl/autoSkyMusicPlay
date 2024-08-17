@@ -2,12 +2,14 @@ package me.mm.sky.auto.music.sheet.utils
 
 import android.graphics.Path
 import me.mm.sky.auto.music.context.MyContext
+import me.mm.sky.auto.music.floatwin.FloatViewModel
 
 class Key {
     companion object {
         val keyMap: MutableMap<String, Key> = mutableMapOf()
 
         fun init(x0: Int, y0: Int, x1: Int, y1: Int) {
+            FloatViewModel.updateKeyboardRect(x0, y0, x1, y1)
             val perX = (x1 - x0) / 4
             val perY = (y1 - y0) / 2
 
