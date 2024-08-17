@@ -9,15 +9,24 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
+import com.google.gson.Gson
+import com.google.gson.JsonParser
+import com.google.gson.JsonSyntaxException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.mm.auto.audio.list.database.AppDatabase
+import me.mm.auto.audio.list.database.Song
 import me.mm.sky.auto.music.floatwin.FloatingWindowService
-import me.mm.sky.auto.music.service.HolderService
-import me.mm.sky.auto.music.service.MyService
-import me.mm.sky.auto.music.tools.AccessibilityUtils
+import me.mm.sky.auto.music.sheet.utils.Key
+import me.mm.sky.auto.music.tools.FileUtils
 import me.mm.sky.auto.music.ui.data.MainScreenViewModel
-import me.mm.sky.auto.music.ui.setting.SettingItem
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
 
 
 class MyContext : Application() {
@@ -103,6 +112,44 @@ class MyContext : Application() {
                 }
             }
         }
+        suspend fun files2Db( ) {
+            withContext(Dispatchers.IO) {
+                val songList = mutableListOf<Song>()
+                val songDao = database.songDao()
+                val filePath = context.getExternalFilesDirs(null).get(0)
+                val directory = File(filePath, "sheets")
+                if (directory.exists() && directory.isDirectory) {
+                    val files = directory.listFiles() ?: return@withContext
+                    for (file in files) {
+                        Log.e("MyContext", "files2Db: "+file.name )
+                        if (file.isFile && file.extension == "txt") {
+                            try {
+                                val strings = FileUtils.readTextFile(file.absolutePath)
+                                val jsonString=strings.replace("\\", "\\\\")
+                                val jsonArray = JsonParser.parseString(jsonString).asJsonArray
+                                val firstElement = jsonArray[0]
+                                val song: Song = Gson().fromJson(firstElement, Song::class.java)
+                                if (songDao.existSong(file.nameWithoutExtension) == 0) {
+                                    song.name = file.nameWithoutExtension
+                                    songList.add(song)
+                                }
+                                file.delete()
+                            } catch (e: IOException) {
+                                // 处理读取文件时的 IO 异常
+                                Log.e("files2Db", "读取文件 ${file.name} 时出错: ${e.message}")
+                            } catch (e: JsonSyntaxException) {
+                                // 处理 JSON 解析异常
+                                Log.e("files2Db", "解析文件 ${file.name} 时出错: ${e.message}")
+                            }
+                        }
+                    }
+                }
+                for (song in songList) {
+                    songDao.insert(song)
+                }
+            }
+        }
+
 
     }
 
@@ -110,33 +157,73 @@ class MyContext : Application() {
         super.onCreate()
         context = this
         database = AppDatabase.getInstance(context)
+        if (getBoolean("firstStart",true)){
+            copyAssetsToPrivateStorage("sheets")
+        }
+        initKeyMap()
+        MainScreenViewModel.files2Db()
         if (!FloatingWindowService.isServiceRunning()) {
             context.startService(Intent(context, FloatingWindowService::class.java))
         }
-        val uiState = MainScreenViewModel.uiState.value
 
-        // 读取配置
-        uiState.settingItems.forEach {
-            when (it.key) {
-                "root_auto_acc" -> {
-                    if (it.value as Boolean) {
-                        if (!isAccessibilityEnabled()) {
-                            AccessibilityUtils.enableAccessibilityService(MyService::class.java.name)
-                        }
-                    }
+    }
+    private fun initKeyMap() {
+        val x0=getInt("x0",0)
+        val y0=getInt("y0",0)
+        val x1=getInt("x1",0)
+        val y1=getInt("y1",0)
+        if (x0==0||y0==0||x1==0||y1==0){
+            return
+        }
+        Key.init(x0,y0,x1,y1)
+    }
+    private fun copyAssetsToPrivateStorage(assetsSubdirectory: String) {
+        try {
+            val assetFiles = assets.list(assetsSubdirectory) ?: emptyArray()
+            for (assetFile in assetFiles) {
+                val inputStream = assets.open("$assetsSubdirectory/$assetFile")
+                val outputDir = File(getExternalFilesDir(null), assetsSubdirectory)
+                if (!outputDir.exists()) {
+                    outputDir.mkdirs()
                 }
-                "hide_task" -> {
-                    if (it.value as Boolean) {
-                        hideTask(true)
+                val outputFile = File(outputDir, assetFile)
+                val outputStream = FileOutputStream(outputFile)
+
+                inputStream.use { input ->
+                    outputStream.use { output ->
+                        input.copyTo(output)
                     }
                 }
             }
+            editBoolean("firstStart",false)
+        } catch (e: IOException) {
+            Log.e("MainActivity", "复制 assets 文件时出错: ${e.message}")
         }
-        // 根据开启的权限情况，更新HomeScreen内容
-        MainScreenViewModel.uiState.value = uiState.copy(
-            isFloatWindowGranted = getIsFloatWindowGranted(),
-            isNotificationGranted = getIsNotificationGranted(),
-            isAccGranted = isAccessibilityEnabled()
-        )
     }
+
+    fun copyTxtFilesToSheets(context: Context) {
+        val externalFilesDir = context.getExternalFilesDirs(null).firstOrNull() ?: return
+        val sheetsDir = File(externalFilesDir, "sheets")
+        if (!sheetsDir.exists()) {
+            sheetsDir.mkdirs()
+        }
+        val txtFiles = externalFilesDir.listFiles { file -> file.isFile && file.extension == "txt" }
+        txtFiles?.forEach { txtFile ->
+            val destinationFile = File(sheetsDir, txtFile.name)
+            copyFile(txtFile, destinationFile)
+        }
+    }
+
+    private fun copyFile(sourceFile: File, destinationFile: File) {
+        FileInputStream(sourceFile).use { input ->
+            FileOutputStream(destinationFile).use { output ->
+                val buffer = ByteArray(1024)
+                var length: Int
+                while (input.read(buffer).also { length = it } > 0) {
+                    output.write(buffer, 0, length)
+                }
+            }
+        }
+    }
+
 }

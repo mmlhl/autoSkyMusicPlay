@@ -1,23 +1,19 @@
 package me.mm.sky.auto.music.ui.data
 
-import android.accessibilityservice.AccessibilityService.ScreenshotResult
-import android.os.Build
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.ViewModel
+import com.petterp.floatingx.FloatingX
 import kotlinx.coroutines.flow.MutableStateFlow
-import me.mm.sky.auto.music.R
+import kotlinx.coroutines.launch
 import me.mm.sky.auto.music.context.MyContext
 import me.mm.sky.auto.music.context.MyContext.Companion.editBoolean
 import me.mm.sky.auto.music.context.MyContext.Companion.editInt
 import me.mm.sky.auto.music.context.MyContext.Companion.editString
-import me.mm.sky.auto.music.service.MyService
+import me.mm.sky.auto.music.tools.AccessibilityUtils
 import me.mm.sky.auto.music.ui.HomeScreen
+import me.mm.sky.auto.music.ui.data.music.MusicViewModel
 import me.mm.sky.auto.music.ui.setting.SettingItem
 import me.mm.sky.auto.music.ui.setting.SettingType
-import org.loka.screensharekit.EncodeBuilder
-import org.loka.screensharekit.ScreenShareKit
-import org.loka.screensharekit.callback.RGBACallBack
 
 object MainScreenViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
@@ -41,9 +37,27 @@ object MainScreenViewModel : ViewModel() {
             }
         )
     }
+    fun files2Db() {
+        viewModelScope.launch {
+            MusicViewModel.loadSongs()
+            MyContext.files2Db()
+        }
+
+    }
+    fun stopAllService() {
+        MusicViewModel.stop()
+        FloatingX.control("floating").hide()
+        FloatingX.control("smallIcon").hide()
+    }
     fun updateStartStatue(isStart: Boolean) {
         _uiState.value = _uiState.value.copy(startStatue = isStart)
 
+
+    }
+    fun rootStartService() {
+        viewModelScope.launch {
+            AccessibilityUtils.enableAccessibilityService("me.mm.sky.auto.music/.service.MyService")
+        }
 
     }
 

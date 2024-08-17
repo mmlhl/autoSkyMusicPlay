@@ -19,3 +19,9 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+-keep class me.mm.auto.audio.list.database.SongNote {
+    *;
+}
+-keep class me.mm.sky.auto.music.context.MyContext{
+*;
+}

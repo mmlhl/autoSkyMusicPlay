@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import me.mm.sky.auto.music.tools.ui.theme.MyTheme
+import me.mm.sky.auto.music.ui.data.MainScreenViewModel
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -34,12 +35,13 @@ class ImportFileActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting2("Android")
+                    Greeting2("你好，我是木木，qq488803459")
                 }
             }
         }
 
         handleIntent(intent)
+        finish()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -87,8 +89,9 @@ class ImportFileActivity : ComponentActivity() {
             try {
                 val inputStream = contentResolver.openInputStream(uri)
                 if (inputStream != null) {
-                    val internalFile = File(filesDir, fileName)
+                    val internalFile = File(File(getExternalFilesDir(null),"sheets"), fileName)
                     copyToInternalStorage(inputStream, internalFile)
+                    MainScreenViewModel.files2Db()
                     Toast.makeText(this, "文件已保存到私有目录: ${internalFile.absolutePath}", Toast.LENGTH_LONG).show()
                 } else {
                     Toast.makeText(this, "无法读取文件流", Toast.LENGTH_SHORT).show()

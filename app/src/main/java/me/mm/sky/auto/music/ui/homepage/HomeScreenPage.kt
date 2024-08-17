@@ -139,9 +139,9 @@ fun StartServiceCard(
         onClick = {
             MainScreenViewModel.updateStartStatue(!uiState.startStatue)
             if (uiState.startStatue) {
-                FloatingWindowService.updateFloatState(FloatSateEnum.FLOAT_NONE)
+                MainScreenViewModel.stopAllService()
             } else {
-                FloatingWindowService.updateFloatState(FloatSateEnum.FLOAT_SMALL_ICON)
+                FloatViewModel.updateFloatState(FloatSateEnum.FLOAT_LIST)
 
             }
 
