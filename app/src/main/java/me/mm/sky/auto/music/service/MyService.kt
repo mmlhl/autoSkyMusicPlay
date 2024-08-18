@@ -41,29 +41,21 @@ class MyService : AccessibilityService() {
         suspend fun dispatchGestureClick(key: Key) = withContext(Dispatchers.IO) {
             if (myService == null) {
                 MusicViewModel.pause()
-                Toast.makeText(
-                    MyContext.context,
-                    "无障碍服务未在运行或故障，请重新授予无障碍权限",
-                    Toast.LENGTH_SHORT
-                ).show()
+                toast("无障碍服务未在运行或故障，请重新授予无障碍权限")
                 return@withContext
             }
             val builder = GestureDescription.Builder()
             val path = Path()
             path.moveTo((key.x - 2).toFloat(), (key.y - 2).toFloat())
             path.lineTo((key.x + 2).toFloat(), (key.y + 2).toFloat())
-            builder.addStroke(StrokeDescription(path, 0, 50))
+            builder.addStroke(StrokeDescription(path, 0, 100))
             myService!!.dispatchGesture(builder.build(), null, null)
         }
 
         fun dispatchGestureClickOnNewTh(key: Key) {
             if (myService == null) {
                 MusicViewModel.pause()
-                Toast.makeText(
-                    MyContext.context,
-                    "无障碍服务未在运行或故障，请重新授予无障碍权限",
-                    Toast.LENGTH_SHORT
-                ).show()
+                toast("无障碍服务未在运行或故障，请重新授予无障碍权限")
                 return
             }
             Log.e("myService", "dispatchGestureClick: click ${key}")
@@ -78,11 +70,7 @@ class MyService : AccessibilityService() {
         suspend fun dispatchGestureClick(keys: List<Key>) = withContext(Dispatchers.IO) {
             if (myService == null) {
                 MusicViewModel.pause()
-                Toast.makeText(
-                    MyContext.context,
-                    "无障碍服务未在运行或故障，请重新授予无障碍权限",
-                    Toast.LENGTH_SHORT
-                ).show()
+                toast("无障碍服务未在运行或故障，请重新授予无障碍权限")
                 return@withContext
             }
             val builder = GestureDescription.Builder()
@@ -108,7 +96,7 @@ class MyService : AccessibilityService() {
         serviceScope.launch {
             event?.let {
                 when (event.eventType) {
-/*
+                    /*
                     AccessibilityEvent.TYPE_ANNOUNCEMENT -> {
                         Log.e("MyService", "onAccessibilityEvent: TYPE_ANNOUNCEMENT")
                     }
