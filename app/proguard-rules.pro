@@ -25,6 +25,9 @@
 -keep class me.mm.sky.auto.music.context.MyContext{
 *;
 }
+-keep class me.mm.sky.auto.music.service.MyService{
+*;
+}
 # 保留 KSP 生成的代码
 -keep class **_Impl { *; }
 -keep class **_Factory { *; }
