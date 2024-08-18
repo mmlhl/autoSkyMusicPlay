@@ -94,7 +94,6 @@ class MyContext : Application() {
             return enabledServices?.contains(context.packageName) == true
         }
         fun hideTask(exclude: Boolean) {
-
             val activityManager =
                 context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
             val taskInfo = activityManager.appTasks

@@ -3,6 +3,7 @@ package me.mm.sky.auto.music.service
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
 import android.accessibilityservice.GestureDescription.StrokeDescription
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Path
 import android.graphics.Rect
@@ -102,12 +103,12 @@ class MyService : AccessibilityService() {
         MainScreenViewModel.updateIsAccGranted(true)
     }
 
+    @SuppressLint("SwitchIntDef")
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         serviceScope.launch {
-
             event?.let {
                 when (event.eventType) {
-
+/*
                     AccessibilityEvent.TYPE_ANNOUNCEMENT -> {
                         Log.e("MyService", "onAccessibilityEvent: TYPE_ANNOUNCEMENT")
                     }
@@ -221,8 +222,7 @@ class MyService : AccessibilityService() {
 
                     AccessibilityEvent.TYPE_WINDOWS_CHANGED -> {
                         Log.e("MyService", "onAccessibilityEvent: TYPE_WINDOWS_CHANGED")
-                    }
-
+                    }*/
                     AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
                         handleAppChanged(event)
                         return@launch
@@ -231,6 +231,7 @@ class MyService : AccessibilityService() {
                     AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
                         handleAppChanged(event)
                     }
+
                 }
             }
 
@@ -238,24 +239,24 @@ class MyService : AccessibilityService() {
     }
 
     private fun handleAppChanged(event: AccessibilityEvent?) {
-        val rootNode = event?.source
-        if (rootNode != null) {
-            val windowPackageName = rootNode.packageName
-            windowPackageName.let {
-                val ignoreParams = Regex("setting|system",RegexOption.IGNORE_CASE)
-                val skyParams=Regex("sky",RegexOption.IGNORE_CASE)
-                if (windowPackageName.contains(ignoreParams)){
-                    return
-                }else if (windowPackageName.contains(skyParams)){
-                    FloatViewModel.autoUnHideFloat()
-                } else {
-                    FloatViewModel.autoHideFloat()
-                    MusicViewModel.pause()
-                }
+        val autoHide = MainScreenViewModel.uiState.value.settingItems.find { it.key == "hide_float" }?.value as Boolean
+        if (!autoHide) {
+            return
+        }
+        val rootNode = event?.source ?: return
+        val windowPackageName = rootNode.packageName
+        windowPackageName.let {
+            val ignoreParams = Regex("setting|system",RegexOption.IGNORE_CASE)
+            val skyParams=Regex("sky",RegexOption.IGNORE_CASE)
+            if (windowPackageName.contains(ignoreParams)){
+                return
+            }else if (windowPackageName.contains(skyParams)){
+                FloatViewModel.autoUnHideFloat()
+            } else {
+                FloatViewModel.autoHideFloat()
+                MusicViewModel.pause()
             }
         }
-        event?.recycle()
-        rootNode?.recycle()
     }
 
     private fun handleWindowsChanged() {

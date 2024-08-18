@@ -9,6 +9,7 @@ import me.mm.sky.auto.music.context.MyContext
 import me.mm.sky.auto.music.context.MyContext.Companion.editBoolean
 import me.mm.sky.auto.music.context.MyContext.Companion.editInt
 import me.mm.sky.auto.music.context.MyContext.Companion.editString
+import me.mm.sky.auto.music.service.MyService
 import me.mm.sky.auto.music.tools.AccessibilityUtils
 import me.mm.sky.auto.music.ui.HomeScreen
 import me.mm.sky.auto.music.ui.data.music.MusicViewModel
@@ -26,8 +27,8 @@ object MainScreenViewModel : ViewModel() {
                     "hide_task" -> {
                         MyContext.hideTask(value as Boolean)
                     }
-                    "hide_float" -> {
-
+                    "root_auto_acc"->{
+                        updateRootAutoAcc(value as Boolean)
                     }
                 }
                 if (it.key == item.key) {
@@ -58,7 +59,7 @@ object MainScreenViewModel : ViewModel() {
     }
     fun rootStartService() {
         viewModelScope.launch {
-            AccessibilityUtils.enableAccessibilityService("me.mm.sky.auto.music/.service.MyService")
+            AccessibilityUtils.enableAccessibilityService()
         }
 
     }
@@ -73,6 +74,14 @@ object MainScreenViewModel : ViewModel() {
 
     fun updateHideTask(isHide: Boolean) {
         MyContext.hideTask(isHide)
+    }
+    fun updateAutoHideFloat(isHide: Boolean) {
+
+    }
+    private fun updateRootAutoAcc(isAuto: Boolean) {
+        if (isAuto) {
+            AccessibilityUtils.enableAccessibilityService()
+        }
     }
 
     fun updateCurrentScreen(homeScreen: HomeScreen) {
