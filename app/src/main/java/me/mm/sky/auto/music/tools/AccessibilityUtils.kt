@@ -25,10 +25,10 @@ object AccessibilityUtils {
     }
     fun enableAccessibilityService() {
         if (isRooted()) {
-            val packageName = MyService::class.java.`package`?.name
+            val packageName ="me.mm.sky.auto.music/.service.MyService"
 
             Log.e("AccessibilityUtils", "enableAccessibilityService: $packageName")
-            if (!isAccessibilityServiceEnabled(packageName!!)) {
+            if (!isAccessibilityServiceEnabled(packageName)) {
                 val command = "settings put secure enabled_accessibility_services $packageName"
                 executeShellCommand(command)
                 executeShellCommand("settings put secure accessibility_enabled 1")
