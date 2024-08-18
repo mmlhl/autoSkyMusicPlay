@@ -24,5 +24,34 @@
 
 -keep class me.mm.sky.auto.music.context.MyContext{
 *;
-
 }
+# 保留 KSP 生成的代码
+-keep class **_Impl { *; }
+-keep class **_Factory { *; }
+-keep class **_Creator { *; }
+-keep class **_Adapter { *; }
+# 保留 Room 生成的代码
+-keep class androidx.room.RoomDatabase { *; }
+
+-keep class * extends androidx.room.RoomDatabase {
+    *;
+}
+
+
+-keep @androidx.room.Dao class * {
+    *;
+}
+
+-keepclassmembers class * {
+    @androidx.room.* <methods>;
+}
+# 保留实体类及其字段
+-keep class * extends androidx.room.RoomDatabase {
+    @androidx.room.Entity public *;
+}
+
+-keepclassmembers class * {
+    @androidx.room.ColumnInfo <fields>;
+    @androidx.room.PrimaryKey <fields>;
+}
+
