@@ -25,4 +25,6 @@
     <string name="hide_task_des">将本app从最近任务中隐藏</string>
     <string name="stop_service_title">已启动</string>
     <string name="stop_service_des">点击停止所有服务</string>
+    <string name="hide_float_title">非光遇隐藏浮窗</string>
+    <string name="hide_float_des">在非光遇界面自动隐藏悬浮窗，打开光遇重新显示</string>
 </resources>
