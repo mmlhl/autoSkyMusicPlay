@@ -35,7 +35,6 @@ object MusicViewModel : ViewModel() {
     val currentPlayingSong: StateFlow<Song?> = _currentPlayingSong
     private val songDao = MyContext.database.songDao()
     var songs = _songs.asStateFlow()
-
     private var _currentNoteIndex = MutableStateFlow(0)
     val currentNoteIndex: StateFlow<Int> = _currentNoteIndex
     private var _totalLength = MutableStateFlow(1)
@@ -54,7 +53,6 @@ object MusicViewModel : ViewModel() {
     fun updatePlayProgress(progress: Int) {
         _currentNoteIndex.value = progress
     }
-
     fun pause() {
         _playState.value = PlayState.PAUSE
         job?.cancel()

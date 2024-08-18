@@ -38,6 +38,9 @@ object FloatViewModel : ViewModel() {
         return rect1.left < rect2.right && rect1.right > rect2.left &&
                 rect1.top < rect2.bottom && rect1.bottom > rect2.top
     }
+    fun isOverKeyboard(rect: Rect): Boolean {
+        return areRectOverlapping(rect, keyBoardRect)
+    }
 
     fun updateLocationShowing(isShowing: Boolean) {
         viewModelScope.launch {
