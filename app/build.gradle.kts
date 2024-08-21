@@ -8,12 +8,13 @@ android {
     namespace = "me.mm.sky.auto.music"
     compileSdk = 34
     defaultConfig {
+
         applicationId = "me.mm.sky.auto.music"
         minSdk = 24
         targetSdk = 34
         versionCode = 14
         versionName = "1.4"
-
+        setProperty("archivesBaseName","木木弹琴 $versionName-")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
