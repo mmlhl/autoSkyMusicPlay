@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -97,7 +96,7 @@ object MusicViewModel : ViewModel() {
             _currentNoteIndex.value = 0
         }
         _playState.value = PlayState.PLAYING
-        var lasttime=0
+        var lastTime=0
         val keyMap=Key.keyMap
         if (keyMap.isEmpty()){
             Toast.makeText(MyContext.context, "琴键未初始化,请点击悬浮窗定位按钮进行初始化。", Toast.LENGTH_SHORT).show()
@@ -111,11 +110,11 @@ object MusicViewModel : ViewModel() {
                 _totalLength.value=notes.size
                 for (i in _currentNoteIndex.value until  notes.size) {
                     if (isActive) {
-                        if (lasttime == 0) {
-                            lasttime=notes.get(i).time
+                        if (lastTime == 0) {
+                            lastTime= notes[i].time
                         }
-                        var sleepTime = (notes.get(i).time * _speed).toLong() - lasttime
-                        lasttime = notes[i].time
+                        var sleepTime = (notes[i].time * _speed).toLong() - lastTime
+                        lastTime = notes[i].time
                         if (sleepTime < 2) {
                             sleepTime = 2
                         }
