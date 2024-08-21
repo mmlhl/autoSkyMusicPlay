@@ -93,6 +93,9 @@ class MyService : AccessibilityService() {
 
     @SuppressLint("SwitchIntDef")
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+        if (MainScreenViewModel.stopAll.value) {
+            return
+        }
         serviceScope.launch {
             event?.let {
                 when (event.eventType) {

@@ -9,6 +9,8 @@ import me.mm.sky.auto.music.context.MyContext
 import me.mm.sky.auto.music.context.MyContext.Companion.editBoolean
 import me.mm.sky.auto.music.context.MyContext.Companion.editInt
 import me.mm.sky.auto.music.context.MyContext.Companion.editString
+import me.mm.sky.auto.music.floatwin.FloatSateEnum
+import me.mm.sky.auto.music.floatwin.FloatViewModel
 import me.mm.sky.auto.music.service.MyService
 import me.mm.sky.auto.music.tools.AccessibilityUtils
 import me.mm.sky.auto.music.ui.HomeScreen
@@ -19,6 +21,8 @@ import me.mm.sky.auto.music.ui.setting.SettingType
 object MainScreenViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(MainState())
     var uiState = _uiState
+    private val _stopAll= MutableStateFlow(false)
+    var stopAll=_stopAll
 
     fun updateSettingItem(item: SettingItem, value: Any) {
         _uiState.value = _uiState.value.copy(
@@ -49,6 +53,7 @@ object MainScreenViewModel : ViewModel() {
     }
     fun stopAllService() {
         MusicViewModel.stop()
+        FloatViewModel.updateFloatState(FloatSateEnum.FLOAT_NONE)
         FloatingX.control("floating").hide()
         FloatingX.control("smallIcon").hide()
     }
