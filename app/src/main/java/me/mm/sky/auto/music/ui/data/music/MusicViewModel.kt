@@ -119,7 +119,7 @@ object MusicViewModel : ViewModel() {
                         if (sleepTime < 2) {
                             sleepTime = 2
                         }
-                        delay(sleepTime)
+                        Thread.sleep(sleepTime)
                         _currentNoteIndex.value++
                         keyMap[notes[i].KeyName]?.let { MyService.dispatchGestureClick(it) }
                     } else {
