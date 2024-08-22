@@ -115,9 +115,7 @@ fun HomeScreenPage(
 }
 
 @Composable
-fun StartServiceCard(
-
-) {
+fun StartServiceCard() {
     val context = LocalContext.current
     val uiState = viewModel<MainScreenViewModel>().uiState.collectAsState().value
     val floatViewModel = FloatViewModel

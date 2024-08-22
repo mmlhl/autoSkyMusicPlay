@@ -14,7 +14,7 @@ android {
         targetSdk = 34
         versionCode = 14
         versionName = "1.4"
-        setProperty("archivesBaseName","木木弹琴 $versionName-")
+        setProperty("archivesBaseName","$versionName-")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true

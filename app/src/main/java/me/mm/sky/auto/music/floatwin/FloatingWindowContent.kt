@@ -155,7 +155,6 @@ fun FloatingWindowContent(
                                                 .clickable {
                                                     FloatViewModel.updateFloatState(FloatSateEnum.FLOAT_SMALL_ICON)
                                                 })
-
                                     }
                                 }
                             }
