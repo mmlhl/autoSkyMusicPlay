@@ -4,6 +4,8 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
@@ -35,7 +37,7 @@ fun AutoScrollingOrStaticText(text: String, boxWidth: Dp,modifier: Modifier=Modi
                 text = text,
                 style = TextStyle(fontSize = 16.sp),
                 onTextLayout = { textLayoutResult: TextLayoutResult ->
-                    textWidthPx = textLayoutResult.size.width.toFloat()
+                    textWidthPx = textLayoutResult.size.width.dp.value
                 },
                 color = Color.Transparent,
             )
@@ -47,27 +49,28 @@ fun AutoScrollingOrStaticText(text: String, boxWidth: Dp,modifier: Modifier=Modi
             .width(boxWidth)
             .horizontalScroll(scrollState) // Apply the scroll state to the Box
     ) {
-        with(LocalDensity.current) { boxWidth.toPx() }
         if (textWidthPx <= boxWidthPx) {
                 Text(text = text, fontSize = 16.sp, color = Color.Black)
         } else {
             LaunchedEffect(textWidthPx, boxWidthPx) {
                 coroutineScope.launch {
                     while (true) {
-                        val totalScrollDistance = textWidthPx + boxWidthPx
+                        val totalScrollDistance = textWidthPx+15
                         val scrollDuration = 5000
                         scrollState.animateScrollTo(
                             value = totalScrollDistance.toInt(),
                             animationSpec = tween(durationMillis = scrollDuration, easing = LinearEasing)
                         )
-
                         scrollState.scrollTo(0)
-                        delay(1000)
                     }
                 }
             }
+            Row {
+                Text(text = text, fontSize = 16.sp, color = Color.Black)
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(text = text, fontSize = 16.sp, color = Color.Black)
+            }
 
-            Text(text = text, fontSize = 16.sp, color = Color.Black)
         }
     }
 }

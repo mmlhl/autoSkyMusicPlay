@@ -202,7 +202,6 @@ fun FloatingWindowContent(
                     CustomSeekBar(
                         musicPosition,
                         onProgressChanged ={newPosition ->
-                            Log.e("TAG", "FloatingWindowContent: "+newPosition)
                             MusicViewModel.updatePlayProgress(newPosition)
                         },
                         onProgressDragStart = {
