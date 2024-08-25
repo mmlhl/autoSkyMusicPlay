@@ -95,9 +95,7 @@ class FloatingWindowService : Service() {
             setEnableAnimation(true)
             setLayoutView(ComposeView(MyContext.context).apply {
                 setContent {
-                    FloatingWindowContent() {
-                        FloatingX.control(tag = "floating").hide()
-                    }
+                    FloatingWindowContent()
                 }
             })
             enableComposeSupport()

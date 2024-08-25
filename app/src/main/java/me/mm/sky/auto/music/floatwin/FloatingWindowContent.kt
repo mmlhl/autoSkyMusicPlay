@@ -1,4 +1,3 @@
-import android.util.Log
 import android.widget.FrameLayout
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -17,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.CloseFullscreen
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Pause
@@ -51,13 +49,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.petterp.floatingx.FloatingX
 import me.mm.sky.auto.music.R
 import me.mm.sky.auto.music.floatwin.AutoScrollingOrStaticText
 import me.mm.sky.auto.music.floatwin.CustomSeekBar
 import me.mm.sky.auto.music.floatwin.FloatSateEnum
 import me.mm.sky.auto.music.floatwin.FloatViewModel
-import me.mm.sky.auto.music.floatwin.FloatingWindowService
 import me.mm.sky.auto.music.ui.data.music.MusicViewModel
 import me.mm.sky.auto.music.ui.data.music.PlayState
 
@@ -92,11 +88,102 @@ fun CustomTextField(
         }
     )
 }
+/**/
+@Composable
+fun FloatHeaderLayout(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+){
+    AndroidView(
+        factory = { context ->
+            FrameLayout(context).apply {
+                id = R.id.frameLayout
+                layoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT
+                )
+                val composeView = ComposeView(context).apply {
+                    setContent {
+                        content()
+                    }
+                }
+                addView(composeView)
+            }
+        },
+        modifier = Modifier
+    )
+}
 
+@Composable
+fun FloatListHeaderContent(){
+    Box(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.inverseOnSurface)
+            .padding(0.dp, 5.dp)
+    ) {
+        val iconSize = 20.dp
+        Row(modifier = Modifier.align(Alignment.CenterStart)) {
+
+            Icon(
+                imageVector = Icons.Outlined.Settings,
+                contentDescription = null,
+                modifier = Modifier.size(iconSize)
+            )
+            Icon(
+                imageVector = Icons.Outlined.MyLocation,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(iconSize)
+                    .clickable {
+                        FloatViewModel.updateLocationShowing(true)
+                    }
+            )
+
+        }
+        Icon(
+            imageVector = Icons.Outlined.CloseFullscreen,
+            contentDescription = null,
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .size(iconSize)
+                .clickable {
+                    FloatViewModel.updateFloatState(FloatSateEnum.FLOAT_SMALL_ICON)
+                })
+    }
+}
+@Composable
+fun FloatListPlayButton(
+    modifier: Modifier = Modifier,
+){
+    Row(
+        modifier = Modifier.background(MaterialTheme.colorScheme.surfaceDim)
+    ) {
+        val playingState by MusicViewModel.playState.collectAsState()
+        IconButton(onClick = {
+            /*TODO 上一曲*/
+        }) {
+            Icon(imageVector = Icons.Outlined.SkipPrevious, contentDescription = null)
+        }
+        IconButton(onClick = {
+            MusicViewModel.onPlayClick()
+        }) {
+            Icon(
+                imageVector = if (playingState == PlayState.PLAYING) Icons.Outlined.Pause else {
+                    Icons.Outlined.PlayArrow
+                }, contentDescription = null
+            )
+        }
+        IconButton(onClick = {
+            /*TODO 下一曲*/
+        }) {
+            Icon(imageVector = Icons.Outlined.SkipNext, contentDescription = null)
+        }
+    }
+
+}
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun FloatingWindowContent(
-    onClick: () -> Unit = {}
 ) {
 
     val context = LocalContext.current
@@ -112,58 +199,9 @@ fun FloatingWindowContent(
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
             Column {
-                AndroidView(
-                    factory = { context ->
-                        FrameLayout(context).apply {
-                            id = R.id.frameLayout
-                            layoutParams = FrameLayout.LayoutParams(
-                                FrameLayout.LayoutParams.MATCH_PARENT,
-                                FrameLayout.LayoutParams.WRAP_CONTENT
-                            )
-                            val composeView = ComposeView(context).apply {
-                                setContent {
-                                    Box(
-                                        modifier = Modifier
-                                            .background(MaterialTheme.colorScheme.inverseOnSurface)
-                                            .padding(0.dp, 5.dp)
-                                    ) {
-                                        val iconSize = 20.dp
-                                        Row(modifier = Modifier.align(Alignment.CenterStart)) {
-
-                                            Icon(
-                                                imageVector = Icons.Outlined.Settings,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(iconSize)
-                                            )
-                                            Icon(
-                                                imageVector = Icons.Outlined.MyLocation,
-                                                contentDescription = null,
-                                                modifier = Modifier
-                                                    .size(iconSize)
-                                                    .clickable {
-                                                        FloatViewModel.updateLocationShowing(true)
-                                                    }
-                                            )
-
-                                        }
-                                        Icon(
-                                            imageVector = Icons.Outlined.CloseFullscreen,
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .align(Alignment.CenterEnd)
-                                                .size(iconSize)
-                                                .clickable {
-                                                    FloatViewModel.updateFloatState(FloatSateEnum.FLOAT_SMALL_ICON)
-                                                })
-                                    }
-                                }
-                            }
-                            addView(composeView)
-                        }
-                    },
-                    modifier = Modifier
-                )
-
+                FloatHeaderLayout {
+                    FloatListHeaderContent()
+                }
 
                 /*CustomTextField(
                     value = textState,
@@ -175,8 +213,7 @@ fun FloatingWindowContent(
                         .padding(0.dp)
                 )*/
 
-                val musicViewModel: MusicViewModel = MusicViewModel
-                val playingSong by musicViewModel.currentPlayingSong.collectAsState()
+                val playingSong by MusicViewModel.currentPlayingSong.collectAsState()
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -226,31 +263,7 @@ fun FloatingWindowContent(
 
                 }
 
-                Row(
-                    modifier = Modifier.background(MaterialTheme.colorScheme.surfaceDim)
-                ) {
-                    val playState by musicViewModel.playState.collectAsState()
-                    IconButton(onClick = {
-
-                    }) {
-                        Icon(imageVector = Icons.Outlined.SkipPrevious, contentDescription = null)
-                    }
-                    IconButton(onClick = {
-                        musicViewModel.onPlayClick()
-                    }) {
-                        Icon(
-                            imageVector = if (playState == PlayState.PLAYING) Icons.Outlined.Pause else {
-                                Icons.Outlined.PlayArrow
-                            }, contentDescription = null
-                        )
-                    }
-                    IconButton(onClick = {
-                        /*TODO*/
-                    }) {
-                        Icon(imageVector = Icons.Outlined.SkipNext, contentDescription = null)
-                    }
-                }
-
+                FloatListPlayButton()
                 val songs by MusicViewModel.songs.collectAsState()
 
                 Box(
@@ -262,7 +275,7 @@ fun FloatingWindowContent(
                         items(songs) { song ->
                             Column(modifier = Modifier
                                 .clickable {
-                                    musicViewModel.play(song,0)
+                                    MusicViewModel.play(song,0)
                                 }) {
                                 Spacer(
                                     modifier = Modifier
