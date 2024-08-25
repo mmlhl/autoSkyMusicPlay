@@ -255,11 +255,9 @@ fun FloatingWindowContent(
                         },
                         totalLength,
                     )
-/*
                     Box(modifier = Modifier.fillMaxWidth()) {
-                        Text(text = "当前位置：$musicPosition", modifier = Modifier.align(Alignment.Center))
+                        Text(text = "$musicPosition/$totalLength", modifier = Modifier.align(Alignment.Center))
                     }
-*/
 
                 }
 
