@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 fun AutoScrollingOrStaticText(text: String, boxWidth: Dp,modifier: Modifier=Modifier) {
     val scrollState = rememberScrollState()
     var textWidthPx by remember { mutableFloatStateOf(0f) }
-    var boxWidthPx by remember { mutableFloatStateOf(boxWidth.value) }
+    val boxWidthPx=boxWidth.value
     val coroutineScope = rememberCoroutineScope()
     LazyRow (modifier = Modifier.fillMaxWidth()){
         item {
@@ -52,7 +52,6 @@ fun AutoScrollingOrStaticText(text: String, boxWidth: Dp,modifier: Modifier=Modi
                 .horizontalScroll(scrollState)
         ) {
             if (textWidthPx <= boxWidthPx*3) {
-
                 Text(text = text, fontSize = 16.sp, color = Color.Black,modifier=Modifier.align(Alignment.Center))
             } else {
                 LaunchedEffect(textWidthPx, boxWidthPx) {
@@ -65,6 +64,7 @@ fun AutoScrollingOrStaticText(text: String, boxWidth: Dp,modifier: Modifier=Modi
                                 animationSpec = tween(durationMillis = scrollDuration, easing = LinearEasing)
                             )
                             scrollState.scrollTo(0)
+                            delay(0)
                         }
                     }
                 }
