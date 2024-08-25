@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.outlined.CloseFullscreen
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Pause
@@ -52,6 +53,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import me.mm.sky.auto.music.R
 import me.mm.sky.auto.music.floatwin.AutoScrollingOrStaticText
 import me.mm.sky.auto.music.floatwin.CustomSeekBar
+import me.mm.sky.auto.music.floatwin.FloatContentEnum
 import me.mm.sky.auto.music.floatwin.FloatSateEnum
 import me.mm.sky.auto.music.floatwin.FloatViewModel
 import me.mm.sky.auto.music.ui.data.music.MusicViewModel
@@ -66,8 +68,7 @@ fun CustomTextField(
     cursorColor: Color = Color.Black,
     lineColor: Color = Color.Black
 ) {
-    BasicTextField(
-        value = value,
+    BasicTextField(value = value,
         onValueChange = onValueChange,
         textStyle = textStyle,
         cursorBrush = SolidColor(cursorColor),
@@ -85,22 +86,20 @@ fun CustomTextField(
             },
         decorationBox = { innerTextField ->
             innerTextField()
-        }
-    )
+        })
 }
+
 /**/
 @Composable
 fun FloatHeaderLayout(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-){
+    modifier: Modifier = Modifier, content: @Composable () -> Unit
+) {
     AndroidView(
         factory = { context ->
             FrameLayout(context).apply {
                 id = R.id.frameLayout
                 layoutParams = FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.WRAP_CONTENT
+                    FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT
                 )
                 val composeView = ComposeView(context).apply {
                     setContent {
@@ -109,13 +108,14 @@ fun FloatHeaderLayout(
                 }
                 addView(composeView)
             }
-        },
-        modifier = Modifier
+        }, modifier = Modifier
     )
 }
 
 @Composable
-fun FloatListHeaderContent(){
+fun FloatListHeaderContent(
+    onSettingClick: () -> Unit = {},
+) {
     Box(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.inverseOnSurface)
@@ -124,24 +124,23 @@ fun FloatListHeaderContent(){
         val iconSize = 20.dp
         Row(modifier = Modifier.align(Alignment.CenterStart)) {
 
-            Icon(
-                imageVector = Icons.Outlined.Settings,
+            Icon(imageVector = Icons.Outlined.Settings,
                 contentDescription = null,
-                modifier = Modifier.size(iconSize)
-            )
-            Icon(
-                imageVector = Icons.Outlined.MyLocation,
+                modifier = Modifier
+                    .size(iconSize)
+                    .clickable {
+                        onSettingClick()
+                    })
+            Icon(imageVector = Icons.Outlined.MyLocation,
                 contentDescription = null,
                 modifier = Modifier
                     .size(iconSize)
                     .clickable {
                         FloatViewModel.updateLocationShowing(true)
-                    }
-            )
+                    })
 
         }
-        Icon(
-            imageVector = Icons.Outlined.CloseFullscreen,
+        Icon(imageVector = Icons.Outlined.CloseFullscreen,
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.CenterEnd)
@@ -151,10 +150,9 @@ fun FloatListHeaderContent(){
                 })
     }
 }
+
 @Composable
-fun FloatListPlayButton(
-    modifier: Modifier = Modifier,
-){
+fun FloatListPlayButton() {
     Row(
         modifier = Modifier.background(MaterialTheme.colorScheme.surfaceDim)
     ) {
@@ -181,11 +179,112 @@ fun FloatListPlayButton(
     }
 
 }
+
+@Composable
+fun ListScreen() {
+    val playingSong by MusicViewModel.currentPlayingSong.collectAsState()
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceDim)
+    ) {
+        AutoScrollingOrStaticText(
+            text = if (playingSong == null) {
+                "无歌曲播放"
+            } else {
+                "正在播放 ${playingSong?.name}"
+            }, boxWidth = 150.dp, modifier = Modifier.align(Alignment.CenterStart)
+        )
+    }
+    val musicPosition by MusicViewModel.currentNoteIndex.collectAsState()
+    val totalLength by MusicViewModel.totalLength.collectAsState()
+    var dragging by remember {
+        mutableStateOf(false)
+    }
+    var playState = PlayState.NONE
+    Column(modifier = Modifier.background(MaterialTheme.colorScheme.surfaceDim)) {
+        CustomSeekBar(
+            musicPosition,
+            onProgressChanged = { newPosition ->
+                MusicViewModel.updatePlayProgress(newPosition)
+            },
+            onProgressDragStart = {
+                playState = MusicViewModel.playState.value
+                dragging = true
+                MusicViewModel.pause()
+            },
+            onProgressDragEnd = {
+                dragging = false
+                if (playState == PlayState.PLAYING) {
+                    MusicViewModel.play()
+                }
+
+            },
+            totalLength,
+        )
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Text(text = "$musicPosition/$totalLength", modifier = Modifier.align(Alignment.Center))
+        }
+
+    }
+
+    FloatListPlayButton()
+    val songs by MusicViewModel.songs.collectAsState()
+
+    Box(
+        modifier = Modifier
+            .height(150.dp)
+            .fillMaxWidth()
+    ) {
+        LazyColumn {
+            items(songs) { song ->
+                Column(modifier = Modifier.clickable {
+                    MusicViewModel.play(song, 0)
+                }) {
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(Color.Black)
+                    )
+                    LazyRow {
+                        item {
+                            Box(modifier = Modifier.padding(6.dp, 4.dp)) {
+                                Text(text = song.name)
+                            }
+
+                        }
+                    }
+//                                AutoScrollingOrStaticText(text = song.name, boxWidth = 150.dp)
+
+
+                }
+
+            }
+
+        }
+    }
+}
+
+@Composable
+fun SettingScreen() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceDim)
+    ) {
+        Text(text = "SettingScreen")
+
+    }
+}
+
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun FloatingWindowContent(
 ) {
-
+    var screen by remember {
+        mutableStateOf(FloatContentEnum.LIST_SCREEN)
+    }
     val context = LocalContext.current
 
     var textState by remember { mutableStateOf(TextFieldValue()) }
@@ -200,10 +299,30 @@ fun FloatingWindowContent(
         ) {
             Column {
                 FloatHeaderLayout {
-                    FloatListHeaderContent()
+                    when (screen) {
+                        FloatContentEnum.LIST_SCREEN -> {
+                            FloatListHeaderContent(onSettingClick = {
+                                screen = FloatContentEnum.SETTING_SCREEN
+                            })
+                        }
+
+                        FloatContentEnum.SETTING_SCREEN -> {
+                            SettingHeader(onBackClick = {
+                                screen = FloatContentEnum.LIST_SCREEN
+                            })
+                        }
+                    }
+                }
+            }
+            when (screen) {
+                FloatContentEnum.LIST_SCREEN -> {
+                    ListScreen()
                 }
 
-                /*CustomTextField(
+                FloatContentEnum.SETTING_SCREEN -> {
+                    SettingScreen()
+                }
+            }/*CustomTextField(
                     value = textState,
                     onValueChange = { textState = it },
                     textStyle = MaterialTheme.typography.labelSmall,
@@ -213,95 +332,32 @@ fun FloatingWindowContent(
                         .padding(0.dp)
                 )*/
 
-                val playingSong by MusicViewModel.currentPlayingSong.collectAsState()
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceDim)
-                ) {
-                    AutoScrollingOrStaticText(
-                        text = if (playingSong == null) {
-                            "无歌曲播放"
-                        } else {
-                            "正在播放 ${playingSong?.name}"
-                        },
-                        boxWidth = 150.dp,
-                        modifier = Modifier.align(Alignment.CenterStart)
-                    )
-                }
-                val musicPosition by MusicViewModel.currentNoteIndex.collectAsState()
-                val totalLength by MusicViewModel.totalLength.collectAsState()
-                var dragging by remember {
-                    mutableStateOf(false)
-                }
-                var playState = PlayState.NONE
-                Column (modifier = Modifier.background(MaterialTheme.colorScheme.surfaceDim)){
-                    CustomSeekBar(
-                        musicPosition,
-                        onProgressChanged ={newPosition ->
-                            MusicViewModel.updatePlayProgress(newPosition)
-                        },
-                        onProgressDragStart = {
-                            playState=MusicViewModel.playState.value
-                            dragging=true
-                            MusicViewModel.pause()
-                        },
-                        onProgressDragEnd = {
-                            dragging=false
-                            if (playState==PlayState.PLAYING){
-                                MusicViewModel.play()
-                            }
 
-                        },
-                        totalLength,
-                    )
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        Text(text = "$musicPosition/$totalLength", modifier = Modifier.align(Alignment.Center))
-                    }
-
-                }
-
-                FloatListPlayButton()
-                val songs by MusicViewModel.songs.collectAsState()
-
-                Box(
-                    modifier = Modifier
-                        .height(150.dp)
-                        .fillMaxWidth()
-                ) {
-                    LazyColumn {
-                        items(songs) { song ->
-                            Column(modifier = Modifier
-                                .clickable {
-                                    MusicViewModel.play(song,0)
-                                }) {
-                                Spacer(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(1.dp)
-                                        .background(Color.Black)
-                                )
-                                LazyRow {
-                                    item {
-                                        Box(modifier = Modifier.padding(6.dp, 4.dp)) {
-                                            Text(text = song.name)
-                                        }
-
-                                    }
-                                }
-//                                AutoScrollingOrStaticText(text = song.name, boxWidth = 150.dp)
-
-
-                            }
-
-                        }
-
-                    }
-                }
-
-            }
         }
-
     }
 
+}
+
+
+@Composable
+fun SettingHeader(
+    onBackClick: () -> Unit = {},
+) {
+
+    Box(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.inverseOnSurface)
+            .padding(0.dp, 5.dp)
+    ) {
+        val iconSize = 20.dp
+        Row(modifier = Modifier.align(Alignment.CenterStart)) {
+            Icon(imageVector = Icons.Default.ArrowBackIosNew,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(iconSize)
+                    .clickable {
+                        onBackClick()
+                    })
+        }
+    }
 }
