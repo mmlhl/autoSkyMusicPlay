@@ -1,5 +1,6 @@
 package me.mm.sky.auto.music.floatwin
 
+import android.util.Log
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.horizontalScroll
@@ -29,7 +30,7 @@ import kotlinx.coroutines.launch
 fun AutoScrollingOrStaticText(text: String, boxWidth: Dp,modifier: Modifier=Modifier) {
     val scrollState = rememberScrollState()
     var textWidthPx by remember { mutableFloatStateOf(0f) }
-    var boxWidthPx by remember { mutableFloatStateOf(0f) }
+    var boxWidthPx by remember { mutableFloatStateOf(boxWidth.value) }
     val coroutineScope = rememberCoroutineScope()
     LazyRow (modifier = Modifier.fillMaxWidth()){
         item {
@@ -44,33 +45,38 @@ fun AutoScrollingOrStaticText(text: String, boxWidth: Dp,modifier: Modifier=Modi
 
         }
     }
-    Box(
-        modifier = Modifier
-            .width(boxWidth)
-            .horizontalScroll(scrollState) // Apply the scroll state to the Box
-    ) {
-        if ((textWidthPx <= boxWidthPx)||text=="无歌曲播放") {
-                Text(text = text, fontSize = 16.sp, color = Color.Black)
-        } else {
-            LaunchedEffect(textWidthPx, boxWidthPx) {
-                coroutineScope.launch {
-                    while (true) {
-                        val totalScrollDistance = textWidthPx+15
-                        val scrollDuration = 5000
-                        scrollState.animateScrollTo(
-                            value = totalScrollDistance.toInt(),
-                            animationSpec = tween(durationMillis = scrollDuration, easing = LinearEasing)
-                        )
-                        scrollState.scrollTo(0)
+    if (textWidthPx > 0){
+        Box(
+            modifier = Modifier
+                .width(boxWidth)
+                .horizontalScroll(scrollState)
+        ) {
+            if (textWidthPx <= boxWidthPx*3) {
+
+                Text(text = text, fontSize = 16.sp, color = Color.Black,modifier=Modifier.align(Alignment.Center))
+            } else {
+                LaunchedEffect(textWidthPx, boxWidthPx) {
+                    coroutineScope.launch {
+                        while (true) {
+                            val totalScrollDistance = textWidthPx+15
+                            val scrollDuration = 5000
+                            scrollState.animateScrollTo(
+                                value = totalScrollDistance.toInt(),
+                                animationSpec = tween(durationMillis = scrollDuration, easing = LinearEasing)
+                            )
+                            scrollState.scrollTo(0)
+                        }
                     }
                 }
-            }
-            Row {
-                Text(text = text, fontSize = 16.sp, color = Color.Black)
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(text = text, fontSize = 16.sp, color = Color.Black)
-            }
+                Row {
+                    Text(text = text, fontSize = 16.sp, color = Color.Black)
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(text = text, fontSize = 16.sp, color = Color.Black)
+                }
 
+            }
         }
+
     }
+
 }
