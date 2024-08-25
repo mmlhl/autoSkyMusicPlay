@@ -49,7 +49,7 @@ fun AutoScrollingOrStaticText(text: String, boxWidth: Dp,modifier: Modifier=Modi
             .width(boxWidth)
             .horizontalScroll(scrollState) // Apply the scroll state to the Box
     ) {
-        if (textWidthPx <= boxWidthPx) {
+        if ((textWidthPx <= boxWidthPx)||text=="无歌曲播放") {
                 Text(text = text, fontSize = 16.sp, color = Color.Black)
         } else {
             LaunchedEffect(textWidthPx, boxWidthPx) {
