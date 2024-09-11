@@ -138,7 +138,6 @@ fun FloatListHeaderContent(
                     .clickable {
                         FloatViewModel.updateLocationShowing(true)
                     })
-
         }
         Icon(imageVector = Icons.Outlined.CloseFullscreen,
             contentDescription = null,
@@ -255,9 +254,6 @@ fun ListScreen() {
 
                         }
                     }
-//                                AutoScrollingOrStaticText(text = song.name, boxWidth = 150.dp)
-
-
                 }
 
             }
@@ -278,16 +274,13 @@ fun SettingScreen() {
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
+
 @Composable
 fun FloatingWindowContent(
 ) {
     var screen by remember {
         mutableStateOf(FloatContentEnum.LIST_SCREEN)
     }
-    val context = LocalContext.current
-
-    var textState by remember { mutableStateOf(TextFieldValue()) }
     Surface(
         color = Color(255, 255, 255, 0),
     ) {
@@ -322,15 +315,7 @@ fun FloatingWindowContent(
                 FloatContentEnum.SETTING_SCREEN -> {
                     SettingScreen()
                 }
-            }/*CustomTextField(
-                    value = textState,
-                    onValueChange = { textState = it },
-                    textStyle = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier
-                        .clickable {
-                        }
-                        .padding(0.dp)
-                )*/
+            }
 
 
         }
