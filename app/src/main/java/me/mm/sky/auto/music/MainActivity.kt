@@ -66,6 +66,7 @@ import me.mm.sky.auto.music.service.HolderService
 import me.mm.sky.auto.music.service.MyService
 import me.mm.sky.auto.music.ui.data.MainScreenViewModel
 import me.mm.sky.auto.music.ui.manager.MyNavHost
+import me.mm.sky.auto.music.ui.statusbar.AppStatusBar
 import me.mm.sky.auto.music.ui.theme.木木弹琴Theme
 
 
@@ -153,41 +154,18 @@ class MainActivity : ComponentActivity() {
 
 }
 
-/****************
- *
- * 发起添加群流程。群号：光遇弹琴辅助(620479828) 的 key 为： B88m46-ejo-5e-Wtr-qgbdTlEVoWJHIK
- * 调用 joinQQGroup("B88m46-ejo-5e-Wtr-qgbdTlEVoWJHIK") 即可发起手Q客户端申请加群 光遇弹琴辅助(620479828)
- *
- * @param key 由官网生成的key
- * @return 返回true表示呼起手Q成功，返回false表示呼起失败
- ******************/
-fun joinQQGroup(context: Context, key: String): Boolean {
-    val intent = Intent().apply {
-        data =
-            Uri.parse("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26jump_from%3Dwebapi%26k%3D$key")
-        // 此Flag可根据具体产品需要自定义，如设置，则在加群界面按返回，返回手Q主界面，不设置，按返回会返回到呼起产品界面
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    }
-    return try {
-        context.startActivity(intent)
-        true
-    } catch (e: Exception) {
-        // 未安装手Q或安装的版本不支持
-        false
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainActivityRootView(navController: NavHostController) {
     val mainScreenViewModel: MainScreenViewModel = viewModel()
     val uiState = mainScreenViewModel.uiState.collectAsState().value
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+    AppStatusBar.SetStatusBarColor(color = MaterialTheme.colorScheme.background, darkIcons = true)
+//    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+//        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         bottomBar = {
             NavigationBar(
-
             ) {
                 uiState.screens.forEach { screen ->
                     NavigationBarItem(
@@ -217,6 +195,7 @@ fun MainActivityRootView(navController: NavHostController) {
             }
 
         },
+/*
         topBar = {
             val context = LocalContext.current
             CenterAlignedTopAppBar(
@@ -250,6 +229,7 @@ fun MainActivityRootView(navController: NavHostController) {
                 scrollBehavior = scrollBehavior
             )
         }
+*/
     ) { padding ->
         MyNavHost(navHostController = navController, modifier = Modifier.padding(padding))
     }

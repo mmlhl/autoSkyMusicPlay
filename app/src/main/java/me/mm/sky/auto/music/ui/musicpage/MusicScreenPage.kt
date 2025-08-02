@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -17,14 +16,12 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -34,40 +31,63 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import me.mm.auto.audio.list.database.AppDatabase
 import me.mm.auto.audio.list.database.Song
 import me.mm.auto.audio.list.database.SongDao
 import me.mm.sky.auto.music.context.MyContext
+import me.mm.sky.auto.music.ui.CollapsingPageScaffold
+import me.mm.sky.auto.music.ui.data.MainScreenViewModel
 import me.mm.sky.auto.music.ui.data.music.MusicViewModel
 
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun MusicScreenPage(
-    modifier: Modifier = Modifier,
-    data: String = ""
+    modifier: Modifier = Modifier, data: String = ""
 ) {
+
+
     val dataBase: AppDatabase by lazy { AppDatabase.getInstance(MyContext.context) }
+
     val songDao: SongDao = dataBase.songDao()
     val songViewModel = MusicViewModel
     val songs by songViewModel.songs.collectAsState()
-    MusicApp(
-        songViewModel = songViewModel,
-        openEditDialog = remember { mutableStateOf(false) },
-        openDeleteDialog = remember { mutableStateOf(false) }
-    )
+    val mainScreenViewModel: MainScreenViewModel = viewModel()
+    val uiState = mainScreenViewModel.uiState.collectAsState().value
+    CollapsingPageScaffold(
+        title = stringResource(id = uiState.currentScreen.title)
+
+        /*onInitialStatusBarColor = MaterialTheme.colorScheme.background,
+        onScrolledStatusBarColor = MaterialTheme.colorScheme.secondary*/
+
+    ) { padding ->
+        Box(modifier = Modifier.padding(padding)) {
+            MusicApp(songViewModel = songViewModel,
+                openEditDialog = remember { mutableStateOf(false) },
+                openDeleteDialog = remember { mutableStateOf(false) })
+        }
+
+    }
 
 
 }
 
 @Composable
 fun MusicItem(
-    song: Song,
-    onClickEdit: () -> Unit,
-    onClickDelete: () -> Unit
+    song: Song, onClickEdit: () -> Unit, onClickDelete: () -> Unit
 ) {
-    Card(modifier = Modifier.padding(horizontal = 5.dp, vertical = 3.dp)) {
+    Card(
+        modifier = Modifier.padding(horizontal = 5.dp, vertical = 3.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 4.dp  // 设置阴影高度
+        )
+        ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -100,21 +120,17 @@ fun MusicItem(
                     .padding(end = 10.dp)
             ) {
                 Row {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
+                    Icon(imageVector = Icons.Default.Edit,
                         contentDescription = null,
-                        modifier = Modifier.clickable { onClickEdit() }
-                    )
+                        modifier = Modifier.clickable { onClickEdit() })
                     Icon(imageVector = Icons.Default.Delete,
                         contentDescription = null,
-                        modifier = Modifier.clickable { onClickDelete() }
-                    )
+                        modifier = Modifier.clickable { onClickDelete() })
                 }
             }
         }
     }
 }
-
 
 
 @Composable
@@ -148,16 +164,12 @@ fun MusicApp(
 
     if (openEditDialog.value) {
         EditSongDialog(
-            openEditDialog = openEditDialog,
-            nowSong = nowSong,
-            songViewModel = songViewModel
+            openEditDialog = openEditDialog, nowSong = nowSong, songViewModel = songViewModel
         )
     }
     if (openDeleteDialog.value) {
         DeleteSongDialog(
-            openDeleteDialog = openDeleteDialog,
-            nowSong = nowSong,
-            songViewModel = songViewModel
+            openDeleteDialog = openDeleteDialog, nowSong = nowSong, songViewModel = songViewModel
         )
     }
 }
@@ -175,17 +187,13 @@ fun ShowSongList(
 
     LazyColumn(modifier = modifier) {
         items(songs) { song ->
-            MusicItem(
-                song = song,
-                onClickEdit = {
-                    openEditDialog.value = true
-                    nowSong.value = song
-                },
-                onClickDelete = {
-                    openDeleteDialog.value = true
-                    nowSong.value = song
-                }
-            )
+            MusicItem(song = song, onClickEdit = {
+                openEditDialog.value = true
+                nowSong.value = song
+            }, onClickDelete = {
+                openDeleteDialog.value = true
+                nowSong.value = song
+            })
         }
     }
 }
@@ -200,18 +208,15 @@ fun EditSongDialog(
     var author by remember { mutableStateOf(nowSong.value.author) }
     var transcribedBy by remember { mutableStateOf(nowSong.value.transcribedBy) }
 
-    AlertDialog(
-        onDismissRequest = { openEditDialog.value = false },
+    AlertDialog(onDismissRequest = { openEditDialog.value = false },
         title = { Text(text = nowSong.value.name) },
         text = {
-            EditSongFields(
-                name = name,
+            EditSongFields(name = name,
                 author = author,
                 transcribedBy = transcribedBy,
                 onNameChange = { name = it },
                 onAuthorChange = { author = it },
-                onTranscribedByChange = { transcribedBy = it }
-            )
+                onTranscribedByChange = { transcribedBy = it })
         },
         dismissButton = {
             TextButton(onClick = { openEditDialog.value = false }) {
@@ -228,9 +233,9 @@ fun EditSongDialog(
             }) {
                 Text(text = "保存")
             }
-        }
-    )
+        })
 }
+
 @Composable
 fun DeleteSongDialog(
     openDeleteDialog: MutableState<Boolean>,
@@ -274,9 +279,7 @@ fun EditSongFields(
 
 @Composable
 fun EditRow(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit
+    label: String, value: String, onValueChange: (String) -> Unit
 ) {
     Row(modifier = Modifier.padding(8.dp)) {
         Text(text = label)

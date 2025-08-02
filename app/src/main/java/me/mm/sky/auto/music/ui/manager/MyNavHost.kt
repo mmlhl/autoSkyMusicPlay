@@ -14,13 +14,13 @@ import me.mm.sky.auto.music.ui.setting.SettingScreenPage
 fun MyNavHost(navHostController: NavHostController,modifier: Modifier) {
     NavHost(navController = navHostController,modifier=modifier, startDestination = HomeScreen.HOME.route){
         composable(HomeScreen.HOME.route){
-            HomeScreenPage()
+            HomeScreenPage(modifier = modifier)
         }
         composable(HomeScreen.MUSIC.route){
-            MusicScreenPage()
+            MusicScreenPage(modifier = modifier)
         }
         composable(HomeScreen.SETTINGS.route){
-            SettingScreenPage()
+            SettingScreenPage(modifier = modifier)
         }
     }
 }
