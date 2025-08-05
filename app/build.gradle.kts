@@ -60,9 +60,9 @@ dependencies {
     ksp ("androidx.room:room-compiler:$roomVersion")
     implementation ("androidx.room:room-ktx:$roomVersion")
 
-    implementation ("io.github.petterpx:floatingx:2.2.4")
+    implementation ("io.github.petterpx:floatingx:2.3.5")
 
-    implementation ("io.github.petterpx:floatingx-compose:2.2.4")
+    implementation ("io.github.petterpx:floatingx-compose:2.3.5")
 
 //    implementation ("com.github.only52607:ComposeFloatingWindow:1.0")
 //    implementation ("com.google.android.material:material:1.12.0")
