@@ -44,7 +44,7 @@ object MusicViewModel : ViewModel() {
     private var job: Job? = null
 
 
-    private val _dragTime = MutableStateFlow<String>("10:10")
+    private val _dragTime = MutableStateFlow<String>("00:00")
     val dragTime= _dragTime
     init {
         loadSongs()
@@ -134,7 +134,7 @@ object MusicViewModel : ViewModel() {
     fun deleteSong(song: Song) {
         viewModelScope.launch {
             songDao.delete(song.id)
-            loadSongs()
+//            loadSongs()
         }
     }
     fun loadSongs() {
