@@ -166,7 +166,7 @@ object MusicViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 songDao.update(song)
-                loadSongs()
+                //loadSongs()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
