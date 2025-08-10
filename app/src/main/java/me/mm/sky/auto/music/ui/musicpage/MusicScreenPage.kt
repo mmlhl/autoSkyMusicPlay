@@ -41,13 +41,19 @@ import me.mm.sky.auto.music.ui.CollapsingPageScaffold
 import me.mm.sky.auto.music.ui.data.MainScreenViewModel
 import me.mm.sky.auto.music.ui.data.music.MusicViewModel
 
-
+sealed class MusicDialogState {
+    object None : MusicDialogState()
+    data class Edit(val song: Song) : MusicDialogState()
+    data class Delete(val song: Song) : MusicDialogState()
+}
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun MusicScreenPage(
     modifier: Modifier = Modifier, data: String = ""
 ) {
 
+    //弹窗状态
+    var dialogState by remember { mutableStateOf<MusicDialogState>(MusicDialogState.None) }
 
     val dataBase: AppDatabase by lazy { AppDatabase.getInstance(MyContext.context) }
 
@@ -67,8 +73,28 @@ fun MusicScreenPage(
         Box(modifier = Modifier.padding(padding)) {
             MusicApp(
                 songViewModel = songViewModel,
-                openEditDialog = remember { mutableStateOf(false) },
-                openDeleteDialog = remember { mutableStateOf(false) })
+                onEditClick = { song -> dialogState = MusicDialogState.Edit(song) },
+                onDeleteClick = { song -> dialogState = MusicDialogState.Delete(song) }
+            )
+            when(val state = dialogState) {
+                is MusicDialogState.Edit -> EditSongDialog(
+                    song = state.song,
+                    onDismiss = { dialogState = MusicDialogState.None },
+                    onSave = { updatedSong ->
+                        songViewModel.changeSong(updatedSong)
+                        dialogState = MusicDialogState.None
+                    }
+                )
+                is MusicDialogState.Delete -> DeleteSongDialog(
+                    song = state.song,
+                    onDismiss = { dialogState = MusicDialogState.None },
+                    onConfirmDelete = {
+                        songViewModel.deleteSong(state.song)
+                        dialogState = MusicDialogState.None
+                    }
+                )
+                else -> {}
+            }
         }
 
     }
@@ -139,44 +165,21 @@ fun MusicItem(
 @Composable
 fun MusicApp(
     songViewModel: MusicViewModel,
-    openEditDialog: MutableState<Boolean>,
-    openDeleteDialog: MutableState<Boolean>
+    onEditClick: (Song) -> Unit,
+    onDeleteClick: (Song) -> Unit
 ) {
-    val nowSong = remember {
-        mutableStateOf(
-            Song(
-                id = 0,
-                name = "",
-                author = "",
-                transcribedBy = "",
-                isComposed = false,
-                bpm = 0,
-                bitsPerPage = 0,
-                pitchLevel = 0,
-                isEncrypted = false,
-                songNotes = emptyList()
-            )
-        )
-    }
-    ShowSongList(
-        songViewModel = songViewModel,
-        openEditDialog = openEditDialog,
-        openDeleteDialog = openDeleteDialog,
-        nowSong = nowSong,
-    )
+    val songs by songViewModel.songs.collectAsState()
 
-    if (openEditDialog.value) {
-        EditSongDialog(
-            openEditDialog = openEditDialog, nowSong = nowSong, songViewModel = songViewModel
-        )
-    }
-    if (openDeleteDialog.value) {
-        DeleteSongDialog(
-            openDeleteDialog = openDeleteDialog, nowSong = nowSong, songViewModel = songViewModel
-        )
+    LazyColumn {
+        items(songs) { song ->
+            MusicItem(
+                song = song,
+                onClickEdit = { onEditClick(song) },
+                onClickDelete = { onDeleteClick(song) }
+            )
+        }
     }
 }
-
 
 @Composable
 fun ShowSongList(
@@ -200,20 +203,19 @@ fun ShowSongList(
         }
     }
 }
-
 @Composable
 fun EditSongDialog(
-    openEditDialog: MutableState<Boolean>,
-    nowSong: MutableState<Song>,
-    songViewModel: MusicViewModel
+    song: Song,
+    onDismiss: () -> Unit,
+    onSave: (Song) -> Unit
 ) {
-    var name by remember { mutableStateOf(nowSong.value.name) }
-    var author by remember { mutableStateOf(nowSong.value.author) }
-    var transcribedBy by remember { mutableStateOf(nowSong.value.transcribedBy) }
+    var name by remember { mutableStateOf(song.name) }
+    var author by remember { mutableStateOf(song.author) }
+    var transcribedBy by remember { mutableStateOf(song.transcribedBy) }
 
     AlertDialog(
-        onDismissRequest = { openEditDialog.value = false },
-        title = { Text(text = nowSong.value.name) },
+        onDismissRequest = onDismiss,
+        title = { Text(text = song.name) },
         text = {
             EditSongFields(
                 name = name,
@@ -221,50 +223,46 @@ fun EditSongDialog(
                 transcribedBy = transcribedBy,
                 onNameChange = { name = it },
                 onAuthorChange = { author = it },
-                onTranscribedByChange = { transcribedBy = it })
+                onTranscribedByChange = { transcribedBy = it }
+            )
         },
         dismissButton = {
-            TextButton(onClick = { openEditDialog.value = false }) {
-                Text(text = "取消")
+            TextButton(onClick = onDismiss) {
+                Text("取消")
             }
         },
         confirmButton = {
             TextButton(onClick = {
-                openEditDialog.value = false
-                nowSong.value = nowSong.value.copy(
-                    name = name, author = author, transcribedBy = transcribedBy
-                )
-                songViewModel.changeSong(nowSong.value)
+                onSave(song.copy(name = name, author = author, transcribedBy = transcribedBy))
             }) {
-                Text(text = "保存")
+                Text("保存")
             }
-        })
+        }
+    )
 }
 
 @Composable
 fun DeleteSongDialog(
-    openDeleteDialog: MutableState<Boolean>,
-    nowSong: MutableState<Song>,
-    songViewModel: MusicViewModel
+    song: Song,
+    onDismiss: () -> Unit,
+    onConfirmDelete: () -> Unit
 ) {
-    AlertDialog(onDismissRequest = {
-        openDeleteDialog.value = false
-    }, title = { Text(text = nowSong.value.name) }, text = {
-        Text(text = "确定删除吗？")
-    }, confirmButton = {
-        TextButton(onClick = {
-            songViewModel.deleteSong(nowSong.value)
-            openDeleteDialog.value = false
-        }) {
-            Text(text = "确定")
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = song.name) },
+        text = { Text("确定删除吗？") },
+        confirmButton = {
+            TextButton(onClick = onConfirmDelete) {
+                Text("确定")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("取消")
+            }
         }
-    }, dismissButton = {
-        TextButton(onClick = { openDeleteDialog.value = false }) {
-            Text(text = "取消")
-        }
-    })
+    )
 }
-
 @Composable
 fun EditSongFields(
     name: String,
