@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.mm.auto.audio.list.database.AppDatabase
 import me.mm.auto.audio.list.database.Song
-import me.mm.auto.audio.list.database.SongDao
 import me.mm.sky.auto.music.context.MyContext
 import me.mm.sky.auto.music.ui.CollapsingPageScaffold
 import me.mm.sky.auto.music.ui.data.MainScreenViewModel
@@ -52,11 +51,12 @@ fun MusicScreenPage(
 
     val dataBase: AppDatabase by lazy { AppDatabase.getInstance(MyContext.context) }
 
-    val songDao: SongDao = dataBase.songDao()
+    dataBase.songDao()
     val songViewModel = MusicViewModel
-    val songs by songViewModel.songs.collectAsState()
     val mainScreenViewModel: MainScreenViewModel = viewModel()
     val uiState = mainScreenViewModel.uiState.collectAsState().value
+
+
     CollapsingPageScaffold(
         title = stringResource(id = uiState.currentScreen.title)
 
@@ -65,7 +65,8 @@ fun MusicScreenPage(
 
     ) { padding ->
         Box(modifier = Modifier.padding(padding)) {
-            MusicApp(songViewModel = songViewModel,
+            MusicApp(
+                songViewModel = songViewModel,
                 openEditDialog = remember { mutableStateOf(false) },
                 openDeleteDialog = remember { mutableStateOf(false) })
         }
@@ -87,7 +88,7 @@ fun MusicItem(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp  // 设置阴影高度
         )
-        ) {
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -120,10 +121,12 @@ fun MusicItem(
                     .padding(end = 10.dp)
             ) {
                 Row {
-                    Icon(imageVector = Icons.Default.Edit,
+                    Icon(
+                        imageVector = Icons.Default.Edit,
                         contentDescription = null,
                         modifier = Modifier.clickable { onClickEdit() })
-                    Icon(imageVector = Icons.Default.Delete,
+                    Icon(
+                        imageVector = Icons.Default.Delete,
                         contentDescription = null,
                         modifier = Modifier.clickable { onClickDelete() })
                 }
@@ -208,10 +211,12 @@ fun EditSongDialog(
     var author by remember { mutableStateOf(nowSong.value.author) }
     var transcribedBy by remember { mutableStateOf(nowSong.value.transcribedBy) }
 
-    AlertDialog(onDismissRequest = { openEditDialog.value = false },
+    AlertDialog(
+        onDismissRequest = { openEditDialog.value = false },
         title = { Text(text = nowSong.value.name) },
         text = {
-            EditSongFields(name = name,
+            EditSongFields(
+                name = name,
                 author = author,
                 transcribedBy = transcribedBy,
                 onNameChange = { name = it },
@@ -226,9 +231,9 @@ fun EditSongDialog(
         confirmButton = {
             TextButton(onClick = {
                 openEditDialog.value = false
-                nowSong.value.name = name
-                nowSong.value.author = author
-                nowSong.value.transcribedBy = transcribedBy
+                nowSong.value = nowSong.value.copy(
+                    name = name, author = author, transcribedBy = transcribedBy
+                )
                 songViewModel.changeSong(nowSong.value)
             }) {
                 Text(text = "保存")
@@ -250,7 +255,6 @@ fun DeleteSongDialog(
         TextButton(onClick = {
             songViewModel.deleteSong(nowSong.value)
             openDeleteDialog.value = false
-            songViewModel.loadSongs()
         }) {
             Text(text = "确定")
         }
@@ -282,11 +286,13 @@ fun EditRow(
     label: String, value: String, onValueChange: (String) -> Unit
 ) {
     Row(modifier = Modifier.padding(8.dp)) {
-        Text(text = label)
+        Text(text = label, modifier = Modifier.align(Alignment.CenterVertically))
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            modifier = Modifier.padding(start = 10.dp, end = 10.dp)
+            modifier = Modifier
+                .padding(start = 10.dp, end = 10.dp)
+                .align(Alignment.CenterVertically)
         )
     }
 }
