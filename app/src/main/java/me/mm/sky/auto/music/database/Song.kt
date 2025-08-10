@@ -6,7 +6,8 @@ import androidx.room.TypeConverters
 
 @Entity(tableName = "songs")
 data class Song(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
     var name: String,
     var author: String,
     var transcribedBy: String,
@@ -15,5 +16,7 @@ data class Song(
     val bitsPerPage: Int,
     val pitchLevel: Int,
     val isEncrypted: Boolean,
-    @TypeConverters(SongNotesConverter::class) val songNotes: List<SongNote>
+    // 延迟加载的字段设为 nullable，不在初始查询中包含
+    @TypeConverters(SongNotesConverter::class)
+    val songNotes: List<SongNote>? = null
 )

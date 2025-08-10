@@ -106,7 +106,14 @@ object MusicViewModel : ViewModel() {
         job?.cancel()
         job = viewModelScope.launch(Dispatchers.IO) {
             if (_currentPlayingSong.value != null) {
-                val notes = _currentPlayingSong.value!!.songNotes
+                val song = songDao.getSongWithNotes(_currentPlayingSong.value!!.id)/*_currentPlayingSong.value!!.songNotes*/
+                if (song == null) {
+                    return@launch
+                }
+                val notes = song.songNotes
+                if (notes ==null) {
+                    return@launch
+                }
                 _totalLength.value=notes.size
                 for (i in _currentNoteIndex.value until  notes.size) {
                     if (isActive) {
@@ -140,7 +147,7 @@ object MusicViewModel : ViewModel() {
     fun loadSongs() {
         viewModelScope.launch {
             try {
-                songDao.getAllSongs().collect { songList ->
+                songDao.getAllSongsWithoutNotes().collect { songList ->
                     _songs.value = songList
                 }
             } catch (e: Exception) {
