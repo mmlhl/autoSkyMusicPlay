@@ -6,6 +6,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,6 +28,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.petterp.floatingx.FloatingX
 import me.mm.sky.auto.music.sheet.utils.Key
 
@@ -65,11 +67,14 @@ fun GetKeyLocationWindow(
 
                 }
             },
-        color = Color(120, 180, 120, 120)
+        color = Color(120, 180, 120, 180)
     ) {
         Column {
-            Box {
-                Text(modifier = Modifier.padding(top = 10.dp, start = 5.dp),text = if (clickTimes==0) "请点击屏幕左上角琴键中间位置" else "请点击屏幕右下角琴键中间位置")
+            Box(
+                modifier = Modifier.padding(20.dp,20.dp,0.dp,0.dp)
+            ) {
+                Text("提示：如果绿色部分不能贴紧左侧边缘，请翻转手机屏幕再定位",color = Color.Red)
+                Text(modifier = Modifier.padding(top = 30.dp, start = 20.dp), fontSize = 20.sp, color = Color.Red,text = if (clickTimes==0) "第一步：请点击屏幕左上角琴键中间位置" else "第二步：请点击屏幕右下角琴键中间位置")
             }
             Card(modifier = Modifier, colors = CardDefaults.cardColors(
                 contentColor = MaterialTheme.colorScheme.error
