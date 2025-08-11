@@ -35,6 +35,31 @@ class MyContext : Application() {
         lateinit var floatingWindowService: FloatingWindowService
         lateinit var context: MyContext
         private val handler = Handler(Looper.getMainLooper())
+        fun escapeUnescapedBackslashes(input: String): String {
+            val regex = Regex("""(?<!\\)\\(?![\\/"bfnrtu])""")
+            return regex.replace(input) { "\\\\" }
+        }
+
+        fun replaceControlChars(input: String): String {
+            val sb = StringBuilder()
+            for (ch in input) {
+                when {
+                    ch == '\n' -> sb.append("\\n")
+                    ch == '\r' -> sb.append("\\r")
+                    ch.code in 0..0x1F -> sb.append(String.format("\\u%04x", ch.code))
+                    else -> sb.append(ch)
+                }
+            }
+            return sb.toString()
+        }
+
+        fun cleanJsonString(input: String): String {
+            // 先转义未转义的反斜杠
+            val step1 = escapeUnescapedBackslashes(input)
+            // 再替换控制字符和换行回车
+            return replaceControlChars(step1)
+        }
+
         fun toast(msg: String) {
             //转到主线程，弹窗
             handler.post {
@@ -124,7 +149,7 @@ class MyContext : Application() {
                         if (file.isFile && file.extension == "txt") {
                             try {
                                 val strings = FileUtils.readTextFile(file.absolutePath)
-                                val jsonString=strings.replace("\\", "\\\\")
+                                val jsonString=cleanJsonString(strings)
                                 val jsonArray = JsonParser.parseString(jsonString).asJsonArray
                                 val firstElement = jsonArray[0]
                                 val song: Song = Gson().fromJson(firstElement, Song::class.java)
