@@ -40,25 +40,23 @@ class MyContext : Application() {
             return regex.replace(input) { "\\\\" }
         }
 
-        fun replaceControlChars(input: String): String {
+        fun removeControlChars(input: String): String {
             val sb = StringBuilder()
             for (ch in input) {
-                when {
-                    ch == '\n' -> sb.append("\\n")
-                    ch == '\r' -> sb.append("\\r")
-                    ch.code in 0..0x1F -> sb.append(String.format("\\u%04x", ch.code))
-                    else -> sb.append(ch)
+                // 过滤掉所有控制字符（0x00 - 0x1F）
+                if (ch.code >= 0x20) {
+                    sb.append(ch)
                 }
             }
             return sb.toString()
         }
 
         fun cleanJsonString(input: String): String {
-            // 先转义未转义的反斜杠
             val step1 = escapeUnescapedBackslashes(input)
-            // 再替换控制字符和换行回车
-            return replaceControlChars(step1)
+            val step2 = removeControlChars(step1)
+            return step2
         }
+
 
         fun toast(msg: String) {
             //转到主线程，弹窗
@@ -150,6 +148,7 @@ class MyContext : Application() {
                             try {
                                 val strings = FileUtils.readTextFile(file.absolutePath)
                                 val jsonString=cleanJsonString(strings)
+                                Log.e("MyContext", "files2Db: "+jsonString )
                                 val jsonArray = JsonParser.parseString(jsonString).asJsonArray
                                 val firstElement = jsonArray[0]
                                 val song: Song = Gson().fromJson(firstElement, Song::class.java)
