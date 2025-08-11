@@ -1,4 +1,4 @@
-package me.mm.auto.audio.list.database
+package me.mm.sky.auto.music.database
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -25,6 +25,9 @@ interface SongDao {
 
     @Query("SELECT id, name, author, transcribedBy, isComposed, bpm, bitsPerPage, pitchLevel, isEncrypted FROM songs")
     fun getAllSongsWithoutNotes(): Flow<List<Song>>
+
+    @Query("SELECT id, name, author, transcribedBy, isComposed, bpm, bitsPerPage, pitchLevel, isEncrypted FROM songs")
+    suspend fun getAllSongsWithoutNotesSync(): List<Song>
 
     /*// 只查询 songNotes
     @Query("SELECT songNotes FROM songs WHERE id = :songId")

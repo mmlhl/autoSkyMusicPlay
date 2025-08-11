@@ -17,8 +17,8 @@ import com.google.gson.JsonParser
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import me.mm.auto.audio.list.database.AppDatabase
-import me.mm.auto.audio.list.database.Song
+import me.mm.sky.auto.music.database.AppDatabase
+import me.mm.sky.auto.music.database.Song
 import me.mm.sky.auto.music.floatwin.FloatingWindowService
 import me.mm.sky.auto.music.sheet.utils.Key
 import me.mm.sky.auto.music.tools.FileUtils

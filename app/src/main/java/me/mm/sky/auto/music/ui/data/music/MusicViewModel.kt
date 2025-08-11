@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import me.mm.auto.audio.list.database.Song
+import me.mm.sky.auto.music.database.Song
 import me.mm.sky.auto.music.context.MyContext
 import me.mm.sky.auto.music.service.MyService
 import me.mm.sky.auto.music.sheet.utils.Key

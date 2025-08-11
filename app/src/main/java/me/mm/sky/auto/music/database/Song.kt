@@ -1,8 +1,9 @@
-package me.mm.auto.audio.list.database
+package me.mm.sky.auto.music.database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
+import me.mm.auto.audio.list.database.SongNote
 
 @Entity(tableName = "songs")
 data class Song(

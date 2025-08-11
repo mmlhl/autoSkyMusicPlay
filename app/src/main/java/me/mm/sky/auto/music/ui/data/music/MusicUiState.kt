@@ -1,6 +1,6 @@
 package me.mm.sky.auto.music.ui.data.music
 
-import me.mm.auto.audio.list.database.Song
+import me.mm.sky.auto.music.database.Song
 
 data class MusicUiState(
     var songs:List<Song> = listOf(Song(

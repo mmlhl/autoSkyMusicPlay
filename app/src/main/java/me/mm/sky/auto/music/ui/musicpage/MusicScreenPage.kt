@@ -34,8 +34,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import me.mm.auto.audio.list.database.AppDatabase
-import me.mm.auto.audio.list.database.Song
+import me.mm.sky.auto.music.database.AppDatabase
+import me.mm.sky.auto.music.database.Song
 import me.mm.sky.auto.music.context.MyContext
 import me.mm.sky.auto.music.ui.CollapsingPageScaffold
 import me.mm.sky.auto.music.ui.data.MainScreenViewModel
