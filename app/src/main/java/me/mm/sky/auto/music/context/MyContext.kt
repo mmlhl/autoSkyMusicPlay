@@ -148,7 +148,7 @@ class MyContext : Application() {
                             try {
                                 val strings = FileUtils.readTextFile(file.absolutePath)
                                 val jsonString=cleanJsonString(strings)
-                                Log.e("MyContext", "files2Db: "+jsonString )
+//                                Log.e("MyContext", "files2Db: "+jsonString )
                                 val jsonArray = JsonParser.parseString(jsonString).asJsonArray
                                 val firstElement = jsonArray[0]
                                 val song: Song = Gson().fromJson(firstElement, Song::class.java)
