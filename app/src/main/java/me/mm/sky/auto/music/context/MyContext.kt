@@ -22,7 +22,7 @@ import me.mm.sky.auto.music.database.Song
 import me.mm.sky.auto.music.floatwin.FloatingWindowService
 import me.mm.sky.auto.music.sheet.utils.Key
 import me.mm.sky.auto.music.tools.FileUtils
-import me.mm.sky.auto.music.ui.data.MainScreenViewModel
+import me.mm.sky.auto.music.ui.data.MainActivityViewModel
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -125,7 +125,7 @@ class MyContext : Application() {
             }
         }
         fun updateHideTask() {
-            val uiState = MainScreenViewModel.uiState.value
+            val uiState = MainActivityViewModel.uiState.value
             uiState.settingItems.forEach {
                 when (it.key) {
                     "hide_task" -> {
@@ -184,7 +184,7 @@ class MyContext : Application() {
             copyAssetsToPrivateStorage("sheets")
         }
         initKeyMap()
-        MainScreenViewModel.files2Db()
+        MainActivityViewModel.files2Db()
         if (!FloatingWindowService.isServiceRunning()) {
             context.startService(Intent(context, FloatingWindowService::class.java))
         }

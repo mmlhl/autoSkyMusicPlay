@@ -9,19 +9,17 @@ import android.graphics.Path
 import android.graphics.Rect
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import android.view.accessibility.AccessibilityNodeInfo
-import android.widget.Toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.mm.sky.auto.music.context.MyContext
 import me.mm.sky.auto.music.context.MyContext.Companion.toast
 import me.mm.sky.auto.music.floatwin.FloatViewModel
 import me.mm.sky.auto.music.sheet.utils.Key
-import me.mm.sky.auto.music.ui.data.MainScreenViewModel
+import me.mm.sky.auto.music.ui.data.MainActivityViewModel
+import me.mm.sky.auto.music.ui.data.PermissionRepository
 import me.mm.sky.auto.music.ui.data.music.MusicViewModel
 import me.mm.sky.auto.music.ui.data.music.PlayState
 
@@ -32,7 +30,7 @@ class MyService : AccessibilityService() {
         private var _rememberState = MusicViewModel.playState
         private val serviceJob = Job()
         private val serviceScope = CoroutineScope(Dispatchers.Default + serviceJob)
-        val viewModel = MainScreenViewModel
+        val viewModel = MainActivityViewModel
         fun isStart(): Boolean {
             return myService != null
         }
@@ -88,12 +86,12 @@ class MyService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         myService = this
-        MainScreenViewModel.updateIsAccGranted(true)
+        PermissionRepository.checkAllPermissionsGranted()
     }
 
     @SuppressLint("SwitchIntDef")
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        if (MainScreenViewModel.stopAll.value) {
+        if (MainActivityViewModel.stopAll.value) {
             return
         }
         serviceScope.launch {
@@ -230,7 +228,7 @@ class MyService : AccessibilityService() {
     }
 
     private fun handleAppChanged(event: AccessibilityEvent?) {
-        val autoHide = MainScreenViewModel.uiState.value.settingItems.find { it.key == "hide_float" }?.value as Boolean
+        val autoHide = MainActivityViewModel.uiState.value.settingItems.find { it.key == "hide_float" }?.value as Boolean
         if (!autoHide) {
             return
         }
@@ -282,14 +280,14 @@ class MyService : AccessibilityService() {
 
     override fun onInterrupt() {
         toast("辅助服务被迫中断")
-
+        PermissionRepository.checkAllPermissionsGranted()
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
         toast("辅助服务已关闭")
+        PermissionRepository.checkAllPermissionsGranted()
         myService = null
         serviceJob.cancel()
-        viewModel.updateIsAccGranted(false)
         return super.onUnbind(intent)
     }
 }

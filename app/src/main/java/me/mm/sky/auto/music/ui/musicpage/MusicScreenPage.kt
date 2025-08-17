@@ -38,7 +38,7 @@ import me.mm.sky.auto.music.database.AppDatabase
 import me.mm.sky.auto.music.database.Song
 import me.mm.sky.auto.music.context.MyContext
 import me.mm.sky.auto.music.ui.CollapsingPageScaffold
-import me.mm.sky.auto.music.ui.data.MainScreenViewModel
+import me.mm.sky.auto.music.ui.data.MainActivityViewModel
 import me.mm.sky.auto.music.ui.data.music.MusicViewModel
 
 sealed class MusicDialogState {
@@ -59,7 +59,7 @@ fun MusicScreenPage(
 
     dataBase.songDao()
     val songViewModel = MusicViewModel
-    val mainScreenViewModel: MainScreenViewModel = viewModel()
+    val mainScreenViewModel: MainActivityViewModel = viewModel()
     val uiState = mainScreenViewModel.uiState.collectAsState().value
 
 

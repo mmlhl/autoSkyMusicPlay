@@ -24,7 +24,8 @@ class HolderService : Service() {
 
 
     override fun onBind(intent: Intent): IBinder {
-        TODO("Return the communication channel to the service.")
+        holderService=this
+        return TODO("Provide the return value")
     }
 
     @OptIn(DelicateCoroutinesApi::class)

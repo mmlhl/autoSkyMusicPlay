@@ -1,11 +1,9 @@
 package me.mm.sky.auto.music.tools
 
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,7 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import me.mm.sky.auto.music.tools.ui.theme.MyTheme
-import me.mm.sky.auto.music.ui.data.MainScreenViewModel
+import me.mm.sky.auto.music.ui.data.MainActivityViewModel
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -91,7 +89,7 @@ class ImportFileActivity : ComponentActivity() {
                 if (inputStream != null) {
                     val internalFile = File(File(getExternalFilesDir(null),"sheets"), fileName)
                     copyToInternalStorage(inputStream, internalFile)
-                    MainScreenViewModel.files2Db()
+                    MainActivityViewModel.files2Db()
                     Toast.makeText(this, "文件已保存到私有目录: ${internalFile.absolutePath}", Toast.LENGTH_LONG).show()
                 } else {
                     Toast.makeText(this, "无法读取文件流", Toast.LENGTH_SHORT).show()

@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "me.mm.sky.auto.music"
-    compileSdk = 34
+    compileSdk = 35
     defaultConfig {
 
         applicationId = "me.mm.sky.auto.music"
@@ -51,6 +51,7 @@ android {
 }
 
 dependencies {
+    implementation("me.zhanghai.compose.preference:preference:2.0.0")
 
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.32.0")
 

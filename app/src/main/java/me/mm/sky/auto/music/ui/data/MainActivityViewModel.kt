@@ -1,7 +1,7 @@
 package me.mm.sky.auto.music.ui.data
 
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.petterp.floatingx.FloatingX
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -11,18 +11,17 @@ import me.mm.sky.auto.music.context.MyContext.Companion.editInt
 import me.mm.sky.auto.music.context.MyContext.Companion.editString
 import me.mm.sky.auto.music.floatwin.FloatSateEnum
 import me.mm.sky.auto.music.floatwin.FloatViewModel
-import me.mm.sky.auto.music.service.MyService
-import me.mm.sky.auto.music.tools.AccessibilityUtils
+import me.mm.sky.auto.music.tools.PermissionUtils
 import me.mm.sky.auto.music.ui.HomeScreen
 import me.mm.sky.auto.music.ui.data.music.MusicViewModel
 import me.mm.sky.auto.music.ui.setting.SettingItem
 import me.mm.sky.auto.music.ui.setting.SettingType
 
-object MainScreenViewModel : ViewModel() {
+object MainActivityViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(MainState())
     var uiState = _uiState
-    private val _stopAll= MutableStateFlow(false)
-    var stopAll=_stopAll
+    private val _stopAll = MutableStateFlow(false)
+    var stopAll = _stopAll
 
     fun updateSettingItem(item: SettingItem, value: Any) {
         _uiState.value = _uiState.value.copy(
@@ -31,7 +30,8 @@ object MainScreenViewModel : ViewModel() {
                     "hide_task" -> {
                         MyContext.hideTask(value as Boolean)
                     }
-                    "root_auto_acc"->{
+
+                    "root_auto_acc" -> {
                         updateRootAutoAcc(value as Boolean)
                     }
                 }
@@ -41,9 +41,9 @@ object MainScreenViewModel : ViewModel() {
                 } else {
                     it
                 }
-            }
-        )
+            })
     }
+
     fun files2Db() {
         viewModelScope.launch {
             MusicViewModel.loadSongs()
@@ -51,41 +51,37 @@ object MainScreenViewModel : ViewModel() {
         }
 
     }
+
     fun stopAllService() {
         MusicViewModel.stop()
         FloatViewModel.updateFloatState(FloatSateEnum.FLOAT_NONE)
         FloatingX.control("floating").hide()
         FloatingX.control("smallIcon").hide()
     }
+
     fun updateStartStatue(isStart: Boolean) {
         _uiState.value = _uiState.value.copy(startStatue = isStart)
-
-
     }
+
     fun rootStartService() {
         viewModelScope.launch {
-            AccessibilityUtils.enableAccessibilityService()
+            PermissionUtils.enableAccessibilityService()
         }
 
     }
 
-    fun updateIsAccGranted(isGranted: Boolean) {
-        _uiState.value = _uiState.value.copy(isAccGranted = isGranted)
-    }
-
-    fun updateIsFloatWindowGranted(isGranted: Boolean) {
-        _uiState.value = _uiState.value.copy(isFloatWindowGranted = isGranted)
-    }
 
     fun updateHideTask(isHide: Boolean) {
         MyContext.hideTask(isHide)
     }
+
     fun updateAutoHideFloat(isHide: Boolean) {
 
     }
+
     private fun updateRootAutoAcc(isAuto: Boolean) {
         if (isAuto) {
-            AccessibilityUtils.enableAccessibilityService()
+            PermissionUtils.enableAccessibilityService()
         }
     }
 
@@ -98,9 +94,7 @@ object MainScreenViewModel : ViewModel() {
 
     }
 
-    fun updateIsNotificationGranted(isGranted: Boolean) {
-        _uiState.value = _uiState.value.copy(isNotificationGranted = isGranted)
-    }
+
 
     private fun saveSetting(item: SettingItem, value: Any) {
         when (item.type) {

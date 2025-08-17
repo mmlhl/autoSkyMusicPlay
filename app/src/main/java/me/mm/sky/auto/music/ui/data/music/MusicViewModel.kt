@@ -12,21 +12,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import me.mm.sky.auto.music.database.Song
 import me.mm.sky.auto.music.context.MyContext
+import me.mm.sky.auto.music.database.Song
 import me.mm.sky.auto.music.service.MyService
 import me.mm.sky.auto.music.sheet.utils.Key
 
 enum class PlayState {
-    NONE,
-    PLAYING,
-    PAUSE,
-    STOP
+    NONE, PLAYING, PAUSE, STOP
 }
 
 @SuppressLint("StaticFieldLeak")
 object MusicViewModel : ViewModel() {
-    private var myService: MyService? =null
+    private var myService: MyService? = null
     private val _songs = MutableStateFlow<List<Song>>(emptyList())
     private val _playState = MutableStateFlow(PlayState.NONE)
     val playState: StateFlow<PlayState> = _playState
@@ -45,17 +42,21 @@ object MusicViewModel : ViewModel() {
 
 
     private val _dragTime = MutableStateFlow<String>("00:00")
-    val dragTime= _dragTime
+    val dragTime = _dragTime
+
     init {
         loadSongs()
     }
+
     fun updatePlayProgress(progress: Int) {
         _currentNoteIndex.value = progress
     }
+
     fun pause() {
         _playState.value = PlayState.PAUSE
         job?.cancel()
     }
+
     fun stop() {
         _playState.value = PlayState.STOP
         job?.cancel()
@@ -76,16 +77,17 @@ object MusicViewModel : ViewModel() {
                 _playState.value = PlayState.PLAYING
                 play()
             }
+
             PlayState.STOP -> {
                 _playState.value = PlayState.PLAYING
-                _currentNoteIndex.value=0
+                _currentNoteIndex.value = 0
                 play()
             }
         }
     }
 
-    fun play(song: Song?=_currentPlayingSong.value, index: Int = _currentNoteIndex.value) {
-        myService=MyService.myService
+    fun play(song: Song? = _currentPlayingSong.value, index: Int = _currentNoteIndex.value) {
+        myService = MyService.myService
         if (song == null) {
             return
         }
@@ -96,29 +98,34 @@ object MusicViewModel : ViewModel() {
             _currentNoteIndex.value = 0
         }
         _playState.value = PlayState.PLAYING
-        var lastTime=0
-        val keyMap=Key.keyMap
-        if (keyMap.isEmpty()){
-            Toast.makeText(MyContext.context, "琴键未初始化,请点击悬浮窗定位按钮进行初始化。", Toast.LENGTH_SHORT).show()
+        var lastTime = 0
+        val keyMap = Key.keyMap
+        if (keyMap.isEmpty()) {
+            Toast.makeText(
+                MyContext.context,
+                "琴键未初始化,请点击悬浮窗定位按钮进行初始化。",
+                Toast.LENGTH_SHORT
+            ).show()
             pause()
             return
         }
         job?.cancel()
         job = viewModelScope.launch(Dispatchers.IO) {
             if (_currentPlayingSong.value != null) {
-                val song = songDao.getSongWithNotes(_currentPlayingSong.value!!.id)/*_currentPlayingSong.value!!.songNotes*/
+                val song =
+                    songDao.getSongWithNotes(_currentPlayingSong.value!!.id)/*_currentPlayingSong.value!!.songNotes*/
                 if (song == null) {
                     return@launch
                 }
                 val notes = song.songNotes
-                if (notes ==null) {
+                if (notes == null) {
                     return@launch
                 }
-                _totalLength.value=notes.size
-                for (i in _currentNoteIndex.value until  notes.size) {
+                _totalLength.value = notes.size
+                for (i in _currentNoteIndex.value until notes.size) {
                     if (isActive) {
                         if (lastTime == 0) {
-                            lastTime= notes[i].time
+                            lastTime = notes[i].time
                         }
                         var sleepTime = (notes[i].time * _speed).toLong() - lastTime
                         lastTime = notes[i].time
@@ -144,6 +151,7 @@ object MusicViewModel : ViewModel() {
 //            loadSongs()
         }
     }
+
     fun loadSongs() {
         viewModelScope.launch {
             try {

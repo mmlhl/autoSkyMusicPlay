@@ -1,10 +1,8 @@
 package me.mm.sky.auto.music.tools
 
 import android.util.Log
-import android.widget.Toast
-import me.mm.sky.auto.music.service.MyService
 
-object AccessibilityUtils {
+object PermissionUtils {
     fun isRooted(): Boolean {
         try {
             val process = Runtime.getRuntime().exec("su")
@@ -14,7 +12,7 @@ object AccessibilityUtils {
             process.waitFor()
             return process.exitValue() == 0
         } catch (e: Exception) {
-            e.printStackTrace()
+
         }
         return false
     }

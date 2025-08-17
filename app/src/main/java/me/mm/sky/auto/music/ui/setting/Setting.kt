@@ -15,7 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import me.mm.sky.auto.music.ui.data.MainScreenViewModel
+import me.mm.sky.auto.music.ui.data.MainActivityViewModel
 enum class SettingType {
     BOOLEAN,
     STRING,
@@ -67,7 +67,7 @@ fun SettingItemView(item: SettingItem, modifier: Modifier=Modifier) {
                         Switch(
                             checked = item.value as Boolean,
                             onCheckedChange = { isChecked ->
-                                MainScreenViewModel.updateSettingItem(item, isChecked)
+                                MainActivityViewModel.updateSettingItem(item, isChecked)
                             }
                         )
                     }

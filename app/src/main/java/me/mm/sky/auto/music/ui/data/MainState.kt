@@ -8,8 +8,6 @@ import me.mm.sky.auto.music.ui.setting.SettingItem
 import me.mm.sky.auto.music.ui.setting.SettingType
 
 data class MainState(
-    val homeSettingItems: List<SettingItem> = listOf(
-    ),
     val settingItems: List<SettingItem> = listOf(
         SettingItem("hide_float", SettingType.BOOLEAN, getBoolean("hide_float",false), R.string.hide_float_title,R.string.hide_float_des ),
         SettingItem("root_auto_acc", SettingType.BOOLEAN, getBoolean("root_auto_acc",false), R.string.root_auto_acc_title,R.string.root_auto_acc_des ),
@@ -17,10 +15,6 @@ data class MainState(
 
     ),
     var startStatue: Boolean = false,
-    val isAccGranted: Boolean = false,
-    val hide: Boolean = false,
-    val isFloatWindowGranted: Boolean = false,
-    val isNotificationGranted: Boolean = getIsNotificationGranted(),
     val screens: List<HomeScreen> = HomeScreen.entries,
     val currentScreen: HomeScreen = HomeScreen.HOME
 ) {
