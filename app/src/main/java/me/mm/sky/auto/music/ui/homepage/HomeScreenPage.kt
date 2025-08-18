@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color.rgb
+import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,7 +58,7 @@ import me.mm.sky.auto.music.floatwin.FloatViewModel
 import me.mm.sky.auto.music.ui.data.MainActivityViewModel
 import me.mm.sky.auto.music.ui.data.PermissionData
 import me.mm.sky.auto.music.ui.data.PermissionRepository
-
+import me.mm.sky.auto.music.context.MyContext.Companion.viewModel
 @SuppressLint("IntentWithNullActionLaunch")
 fun joinQQGroup(context: Context, key: String): Boolean {
     val intent = Intent().apply {
@@ -175,9 +177,8 @@ fun ActionCard(permissionData: PermissionData, onClick: () -> Unit) {
 @Composable
 fun HomeScreen() {
 
-    val viewModel = MainActivityViewModel()
     LocalContext.current
-    val uiState = viewModel<MainActivityViewModel>().uiState.collectAsState().value
+    val uiState = viewModel.uiState.collectAsState().value
     val floatViewModel = FloatViewModel
     floatViewModel.floatState.collectAsState().value
     val isAllNecessaryPermissionsGranted by PermissionRepository.allNecessaryPermissionsGranted.collectAsState()
@@ -251,9 +252,20 @@ fun HomeScreen() {
                 "通知" -> {
                     ActionCard(it) {
                         val intent = Intent()
-                        intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS")
-                        intent.putExtra("app_package", context.packageName)
-                        intent.putExtra("app_uid", context.applicationInfo.uid)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        when {
+                            // Android 8.0 及以上
+                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
+                                intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                                intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                            }
+                            // 低于 5.0 的老系统
+                            else -> {
+                                intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                                intent.data = Uri.fromParts("package", context.packageName, null)
+                            }
+                        }
+                        context.startActivity(intent)
 
                     }
                 }

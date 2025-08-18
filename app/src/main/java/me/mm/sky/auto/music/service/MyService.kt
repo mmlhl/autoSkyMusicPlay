@@ -22,16 +22,15 @@ import me.mm.sky.auto.music.ui.data.MainActivityViewModel
 import me.mm.sky.auto.music.ui.data.PermissionRepository
 import me.mm.sky.auto.music.ui.data.music.MusicViewModel
 import me.mm.sky.auto.music.ui.data.music.PlayState
-
+import me.mm.sky.auto.music.context.MyContext.Companion.viewModel
 
 class MyService : AccessibilityService() {
 
     companion object {
-        val mainViewModel = MainActivityViewModel()
+
         private var _rememberState = MusicViewModel.playState
         private val serviceJob = Job()
         private val serviceScope = CoroutineScope(Dispatchers.Default + serviceJob)
-        val viewModel = MainActivityViewModel()
         fun isStart(): Boolean {
             return myService != null
         }
@@ -92,7 +91,7 @@ class MyService : AccessibilityService() {
 
     @SuppressLint("SwitchIntDef")
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        if (mainViewModel.stopAll.value) {
+        if (viewModel.stopAll.value) {
             return
         }
         serviceScope.launch {

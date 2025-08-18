@@ -1,5 +1,6 @@
 package me.mm.sky.auto.music.ui.data
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.petterp.floatingx.FloatingX
@@ -35,6 +36,7 @@ class MainActivityViewModel : ViewModel() {
     }
 
     fun updateStartStatue(isStart: Boolean) {
+        Log.e("MainActivityViewModel", "updateStartStatue: $isStart")
         _uiState.value = _uiState.value.copy(startStatue = isStart)
     }
 

@@ -38,10 +38,10 @@ import me.mm.sky.auto.music.ui.data.PermissionRepository
 import me.mm.sky.auto.music.ui.manager.MyNavHost
 import me.mm.sky.auto.music.ui.theme.木木弹琴Theme
 import androidx.core.net.toUri
-
+import me.mm.sky.auto.music.context.MyContext.Companion.viewModel
 
 class MainActivity : ComponentActivity() {
-    val viewModel: MainActivityViewModel = MainActivityViewModel()
+//    val viewModel: MainActivityViewModel = MainActivityViewModel()
     companion object {
         var activity: ComponentActivity? = null
     }
@@ -81,7 +81,6 @@ class MainActivity : ComponentActivity() {
                 MainActivityRootView(navController)
             }
         }
-        viewModel.uiState.value
 
     }
 

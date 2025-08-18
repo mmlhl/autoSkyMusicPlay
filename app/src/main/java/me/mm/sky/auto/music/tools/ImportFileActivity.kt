@@ -21,9 +21,9 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
-
+import me.mm.sky.auto.music.context.MyContext.Companion.viewModel
 class ImportFileActivity : ComponentActivity() {
-    val viewModel = MainActivityViewModel()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
