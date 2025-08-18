@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_activity_import_file">導入琴譜</string>
+    <string name="Acc_pms_title">無障礙服務</string>
+    <string name="Acc_pms_des">我需要您為我授權無障礙權限以實現自動點擊螢幕</string>
+    <string name="Acc_pms_action_btm_title">授權</string>
+    <string name="app_name">木木彈琴</string>
+    <string name="instructions">本服務由木木彈琴提供</string>
+</resources>
