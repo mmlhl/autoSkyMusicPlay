@@ -3,7 +3,6 @@ package me.mm.sky.auto.music
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -22,26 +21,30 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import me.mm.sky.auto.music.context.MyContext
 import me.mm.sky.auto.music.service.HolderService
 import me.mm.sky.auto.music.ui.data.MainActivityViewModel
 import me.mm.sky.auto.music.ui.data.PermissionRepository
 import me.mm.sky.auto.music.ui.manager.MyNavHost
 import me.mm.sky.auto.music.ui.theme.木木弹琴Theme
-import androidx.core.net.toUri
-import me.mm.sky.auto.music.context.MyContext.Companion.viewModel
 
 class MainActivity : ComponentActivity() {
-//    val viewModel: MainActivityViewModel = MainActivityViewModel()
+    //    val viewModel: MainActivityViewModel = MainActivityViewModel()
     companion object {
         var activity: ComponentActivity? = null
     }
@@ -78,6 +81,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             木木弹琴Theme {
                 val navController = rememberNavController()
+                val systemUiController = rememberSystemUiController()
+                val darkTheme = MaterialTheme.colorScheme.background.luminance() < 0.5f
+                val color = MaterialTheme.colorScheme.background
+                SideEffect {
+                    // 设置状态栏颜色（和背景一致）
+                    systemUiController.setStatusBarColor(
+                        color = color,
+                        darkIcons = !darkTheme // 浅色背景用深色图标，深色背景用亮色图标
+                    )
+                }
                 MainActivityRootView(navController)
             }
         }
@@ -91,7 +104,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainActivityRootView(navController: NavHostController) {
-    val mainScreenViewModel: MainActivityViewModel = viewModel()
+    val mainScreenViewModel: MainActivityViewModel = MyContext.viewModel
     val uiState = mainScreenViewModel.uiState.collectAsState().value
 
 //    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
@@ -123,7 +136,11 @@ fun MainActivityRootView(navController: NavHostController) {
 
         },
     ) { padding ->
-        MyNavHost(navHostController = navController, modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars))
+        MyNavHost(navHostController = navController,
+            modifier = Modifier
+                .padding(0.dp, 0.dp, 0.dp, padding.calculateBottomPadding())
+                .windowInsetsPadding(WindowInsets.statusBars)
+        )
     }
 }
 

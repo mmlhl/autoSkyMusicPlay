@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,13 +18,18 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,9 +37,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import me.mm.sky.auto.music.database.AppDatabase
 import me.mm.sky.auto.music.database.Song
 import me.mm.sky.auto.music.context.MyContext
@@ -46,29 +55,48 @@ sealed class MusicDialogState {
     data class Edit(val song: Song) : MusicDialogState()
     data class Delete(val song: Song) : MusicDialogState()
 }
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun MusicScreenPage(
-    modifier: Modifier = Modifier, data: String = ""
+    modifier: Modifier = Modifier,
 ) {
-
-    //弹窗状态
     var dialogState by remember { mutableStateOf<MusicDialogState>(MusicDialogState.None) }
 
-    val dataBase: AppDatabase by lazy { AppDatabase.getInstance(MyContext.context) }
-
-    dataBase.songDao()
-    val songViewModel = MusicViewModel
-    val mainScreenViewModel: MainActivityViewModel = viewModel()
+    val mainScreenViewModel: MainActivityViewModel = MyContext.viewModel
     val uiState = mainScreenViewModel.uiState.collectAsState().value
 
+    val songViewModel = MusicViewModel
+    val systemUiController = rememberSystemUiController()
 
-    CollapsingPageScaffold(
-        title = stringResource(id = uiState.currentScreen.title)
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
-        /*onInitialStatusBarColor = MaterialTheme.colorScheme.background,
-        onScrolledStatusBarColor = MaterialTheme.colorScheme.secondary*/
+//    val defaultColor = MaterialTheme.colorScheme.background
+//    val scrollFraction = scrollBehavior.state.overlappedFraction
+//    val appBarColor = defaultColor.copy(alpha = scrollFraction)
 
+    // 状态栏颜色联动
+//    SideEffect {
+//        val darkIcons = defaultColor.luminance() > 0.5f
+//        systemUiController.setStatusBarColor(
+//            color = appBarColor,
+//            darkIcons = darkIcons
+//        )
+//    }
+
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            TopAppBar(
+                title = { Text(text = stringResource(id = uiState.currentScreen.title)) },
+                /*colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = appBarColor
+                ),*/
+                scrollBehavior = scrollBehavior
+            )
+        }
     ) { padding ->
         Box(modifier = Modifier.padding(padding)) {
             MusicApp(
@@ -76,7 +104,8 @@ fun MusicScreenPage(
                 onEditClick = { song -> dialogState = MusicDialogState.Edit(song) },
                 onDeleteClick = { song -> dialogState = MusicDialogState.Delete(song) }
             )
-            when(val state = dialogState) {
+
+            when (val state = dialogState) {
                 is MusicDialogState.Edit -> EditSongDialog(
                     song = state.song,
                     onDismiss = { dialogState = MusicDialogState.None },
@@ -96,10 +125,7 @@ fun MusicScreenPage(
                 else -> {}
             }
         }
-
     }
-
-
 }
 
 @Composable

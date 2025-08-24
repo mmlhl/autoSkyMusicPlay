@@ -44,9 +44,10 @@ dependencies {
 
     implementation ("io.github.petterpx:floatingx:2.3.5")
     implementation ("io.github.petterpx:floatingx-compose:2.3.5")
-    implementation ("com.google.code.gson:gson:2.11.0")
+    implementation ("com.google.code.gson:gson:2.13.1")
     implementation ("com.github.princekin-f:EasyFloat:2.0.4")
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.foundation)
 
     val room_version = "2.7.2"
     implementation("androidx.room:room-runtime:$room_version")
@@ -54,11 +55,13 @@ dependencies {
     implementation("androidx.room:room-ktx:${room_version}")
 
     implementation("me.zhanghai.compose.preference:preference:2.1.0")
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.2")
 
 
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.36.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
