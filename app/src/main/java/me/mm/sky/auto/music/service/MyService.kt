@@ -9,6 +9,7 @@ import android.graphics.Path
 import android.graphics.Rect
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,6 +24,8 @@ import me.mm.sky.auto.music.ui.data.PermissionRepository
 import me.mm.sky.auto.music.ui.data.music.MusicViewModel
 import me.mm.sky.auto.music.ui.data.music.PlayState
 import me.mm.sky.auto.music.context.MyContext.Companion.viewModel
+import me.mm.sky.auto.music.ui.setting.SettingObserve
+
 
 class MyService : AccessibilityService() {
 
@@ -228,20 +231,18 @@ class MyService : AccessibilityService() {
     }
 
     private fun handleAppChanged(event: AccessibilityEvent?) {
-//        val autoHide = MainActivityViewModel.uiState.value.settingItems.find { it.key == "hide_float" }?.value as Boolean
-//        if (!autoHide) {
-//            return
-//        }
+        if (!SettingObserve.autoHideEnabled) return
+
         val rootNode = event?.source ?: return
-        val windowPackageName = rootNode.packageName
-        windowPackageName.let {
-            val ignoreParams = Regex("setting|system",RegexOption.IGNORE_CASE)
-            val skyParams=Regex("sky",RegexOption.IGNORE_CASE)
-            if (windowPackageName.contains(ignoreParams)){
-                return
-            }else if (windowPackageName.contains(skyParams)){
-                FloatViewModel.autoUnHideFloat()
-            } else {
+        val windowPackageName = rootNode.packageName ?: return
+
+        val ignoreParams = Regex("setting|system", RegexOption.IGNORE_CASE)
+        val skyParams = Regex("sky", RegexOption.IGNORE_CASE)
+
+        when {
+            windowPackageName.contains(ignoreParams) -> return
+            windowPackageName.contains(skyParams) -> FloatViewModel.autoUnHideFloat()
+            else -> {
                 FloatViewModel.autoHideFloat()
                 MusicViewModel.pause()
             }

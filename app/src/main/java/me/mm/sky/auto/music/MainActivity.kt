@@ -41,6 +41,7 @@ import me.mm.sky.auto.music.service.HolderService
 import me.mm.sky.auto.music.ui.data.MainActivityViewModel
 import me.mm.sky.auto.music.ui.data.PermissionRepository
 import me.mm.sky.auto.music.ui.manager.MyNavHost
+import me.mm.sky.auto.music.ui.setting.SettingObserve
 import me.mm.sky.auto.music.ui.theme.木木弹琴Theme
 
 class MainActivity : ComponentActivity() {
@@ -76,7 +77,7 @@ class MainActivity : ComponentActivity() {
             startService(intent)
         }
         super.onCreate(savedInstanceState)
-
+        SettingObserve.observeSetting(this)
 //        requestPermission(this)
         setContent {
             木木弹琴Theme {
