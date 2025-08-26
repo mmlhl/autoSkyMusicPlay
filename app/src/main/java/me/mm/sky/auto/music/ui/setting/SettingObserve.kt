@@ -2,7 +2,6 @@ package me.mm.sky.auto.music.ui.setting
 
 import android.content.Context
 import android.util.Log
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,36 +31,30 @@ object SettingObserve {
     fun observeSetting(context: Context) {
         // 最近任务隐藏本应用
         scope.launch {
-            context.dataStore.data
-                .map { it[hideTaskKey] ?: false }
-                .collectLatest { enabled ->
-                    hideTaskEnabled = enabled
-                    MyContext.hideTask(enabled)
-                    Log.d("SettingObserve", "HideTask enabled: $enabled")
-                }
+            context.dataStore.data.map { it[hideTaskKey] ?: false }.collectLatest { enabled ->
+                hideTaskEnabled = enabled
+                MyContext.hideTask(enabled)
+                Log.d("SettingObserve", "HideTask enabled: $enabled")
+            }
         }
 
         // 非光遇界面自动收起悬浮窗
         scope.launch {
-            context.dataStore.data
-                .map { it[autoHideKey] ?: false }
-                .collectLatest { enabled ->
-                    autoHideEnabled = enabled
-                    Log.d("SettingObserve", "AutoHide enabled: $enabled")
-                }
+            context.dataStore.data.map { it[autoHideKey] ?: false }.collectLatest { enabled ->
+                autoHideEnabled = enabled
+                Log.d("SettingObserve", "AutoHide enabled: $enabled")
+            }
         }
 
         // 拥有 root 授权自动授权无障碍
         scope.launch {
-            context.dataStore.data
-                .map { it[rootGrantedKey] ?: false }
-                .collectLatest { enabled ->
-                    rootGrantedEnabled = enabled
-                    Log.d("SettingObserve", "RootGranted enabled: $enabled")
-                    if (enabled) {
-                        PermissionUtils.reAbleAccessibilityService()
-                    }
+            context.dataStore.data.map { it[rootGrantedKey] ?: false }.collectLatest { enabled ->
+                rootGrantedEnabled = enabled
+                Log.d("SettingObserve", "RootGranted enabled: $enabled")
+                if (enabled) {
+                    PermissionUtils.reAbleAccessibilityService()
                 }
+            }
         }
     }
 

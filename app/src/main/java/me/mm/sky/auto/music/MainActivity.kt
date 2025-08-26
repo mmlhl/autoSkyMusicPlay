@@ -21,8 +21,10 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
@@ -31,13 +33,13 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import androidx.core.view.WindowCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import me.mm.sky.auto.music.context.MyContext
 import me.mm.sky.auto.music.service.HolderService
+import me.mm.sky.auto.music.ui.HomeScreen
 import me.mm.sky.auto.music.ui.data.MainActivityViewModel
 import me.mm.sky.auto.music.ui.data.PermissionRepository
 import me.mm.sky.auto.music.ui.manager.MyNavHost
@@ -88,8 +90,7 @@ class MainActivity : ComponentActivity() {
                 SideEffect {
                     // 设置状态栏颜色（和背景一致）
                     systemUiController.setStatusBarColor(
-                        color = color,
-                        darkIcons = !darkTheme // 浅色背景用深色图标，深色背景用亮色图标
+                        color = color, darkIcons = !darkTheme // 浅色背景用深色图标，深色背景用亮色图标
                     )
                 }
                 MainActivityRootView(navController)
@@ -105,41 +106,36 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainActivityRootView(navController: NavHostController) {
-    val mainScreenViewModel: MainActivityViewModel = MyContext.viewModel
-    val uiState = mainScreenViewModel.uiState.collectAsState().value
-
-//    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     Scaffold(
-//        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         bottomBar = {
             NavigationBar {
-                uiState.screens.forEach { screen ->
-                    NavigationBarItem(icon = {
-                        Icon(
-                            imageVector = screen.icon,
-                            contentDescription = null,
-                        )
-                    }, label = {
-                        Text(
-                            stringResource(id = screen.title),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }, selected = uiState.currentScreen == screen, onClick = {
-                        if (uiState.currentScreen == screen) {
-                            return@NavigationBarItem
+                HomeScreen.entries.forEach { screen ->
+                    val navBackStackEntry by navController.currentBackStackEntryAsState()
+                    val currentRoute = navBackStackEntry?.destination?.route
+                    val selected = currentRoute == screen.route
+
+                    NavigationBarItem(
+                        icon = { Icon(screen.icon, contentDescription = null) },
+                        label = { Text(stringResource(id = screen.title), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                        selected = selected,
+                        onClick = {
+                            if (!selected) {
+                                navController.navigate(screen.route) {
+                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
                         }
-                        mainScreenViewModel.updateCurrentScreen(screen)
-                        navController.navigate(screen.route)
-                    })
+                    )
                 }
             }
-
-        },
+        }
     ) { padding ->
-        MyNavHost(navHostController = navController,
+        MyNavHost(
+            navHostController = navController,
             modifier = Modifier
-                .padding(0.dp, 0.dp, 0.dp, padding.calculateBottomPadding())
+                .padding(bottom = padding.calculateBottomPadding())
                 .windowInsetsPadding(WindowInsets.statusBars)
         )
     }

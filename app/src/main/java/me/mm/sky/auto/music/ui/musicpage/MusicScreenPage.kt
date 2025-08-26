@@ -1,6 +1,6 @@
 package me.mm.sky.auto.music.ui.musicpage
 
-import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,10 +15,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -29,60 +31,48 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import me.mm.sky.auto.music.database.AppDatabase
 import me.mm.sky.auto.music.database.Song
-import me.mm.sky.auto.music.context.MyContext
-import me.mm.sky.auto.music.ui.CollapsingPageScaffold
-import me.mm.sky.auto.music.ui.data.MainActivityViewModel
+import me.mm.sky.auto.music.ui.HomeScreen
 import me.mm.sky.auto.music.ui.data.music.MusicViewModel
 
 sealed class MusicDialogState {
     object None : MusicDialogState()
     data class Edit(val song: Song) : MusicDialogState()
     data class Delete(val song: Song) : MusicDialogState()
+    object AddMusic: MusicDialogState()
 }
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
-@SuppressLint("StateFlowValueCalledInComposition")
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MusicScreenPage(
+    navController: NavHostController,
     modifier: Modifier = Modifier,
 ) {
     var dialogState by remember { mutableStateOf<MusicDialogState>(MusicDialogState.None) }
 
-    val mainScreenViewModel: MainActivityViewModel = MyContext.viewModel
-    val uiState = mainScreenViewModel.uiState.collectAsState().value
-
     val songViewModel = MusicViewModel
-    val systemUiController = rememberSystemUiController()
-
+    rememberSystemUiController()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val fabVisible by remember { derivedStateOf { scrollBehavior.state.collapsedFraction < 1f } }
 
-//    val defaultColor = MaterialTheme.colorScheme.background
-//    val scrollFraction = scrollBehavior.state.overlappedFraction
-//    val appBarColor = defaultColor.copy(alpha = scrollFraction)
-
-    // 状态栏颜色联动
-//    SideEffect {
-//        val darkIcons = defaultColor.luminance() > 0.5f
-//        systemUiController.setStatusBarColor(
-//            color = appBarColor,
-//            darkIcons = darkIcons
-//        )
-//    }
+    // 监听当前路由
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    val currentScreen = HomeScreen.entries.find { it.route == currentRoute } ?: HomeScreen.MUSIC
 
     Scaffold(
         modifier = Modifier
@@ -90,19 +80,28 @@ fun MusicScreenPage(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(id = uiState.currentScreen.title)) },
-                /*colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = appBarColor
-                ),*/
+                title = { Text(text = stringResource(id = currentScreen.title)) },
                 scrollBehavior = scrollBehavior
             )
-        }
-    ) { padding ->
+        },
+        floatingActionButton = {
+            AnimatedVisibility(visible = fabVisible) {
+                FloatingActionButton(
+                    onClick = {
+                        dialogState=MusicDialogState.AddMusic
+                    }) {
+                    Icon(imageVector = Icons.Outlined.Add, contentDescription = "添加歌曲")
+
+                }
+
+            }
+        }) { padding ->
         Box(modifier = Modifier.padding(padding)) {
             MusicApp(
                 songViewModel = songViewModel,
                 onEditClick = { song -> dialogState = MusicDialogState.Edit(song) },
                 onDeleteClick = { song -> dialogState = MusicDialogState.Delete(song) }
+
             )
 
             when (val state = dialogState) {
@@ -112,19 +111,24 @@ fun MusicScreenPage(
                     onSave = { updatedSong ->
                         songViewModel.changeSong(updatedSong)
                         dialogState = MusicDialogState.None
-                    }
-                )
+                    })
+
                 is MusicDialogState.Delete -> DeleteSongDialog(
                     song = state.song,
                     onDismiss = { dialogState = MusicDialogState.None },
                     onConfirmDelete = {
                         songViewModel.deleteSong(state.song)
                         dialogState = MusicDialogState.None
-                    }
+                    })
+
+                is MusicDialogState.AddMusic -> AddMusicDialog(
+                    onDismiss = {dialogState=MusicDialogState.None}
                 )
+
                 else -> {}
             }
         }
+
     }
 }
 
@@ -190,9 +194,7 @@ fun MusicItem(
 
 @Composable
 fun MusicApp(
-    songViewModel: MusicViewModel,
-    onEditClick: (Song) -> Unit,
-    onDeleteClick: (Song) -> Unit
+    songViewModel: MusicViewModel, onEditClick: (Song) -> Unit, onDeleteClick: (Song) -> Unit
 ) {
     val songs by songViewModel.songs.collectAsState()
 
@@ -201,8 +203,7 @@ fun MusicApp(
             MusicItem(
                 song = song,
                 onClickEdit = { onEditClick(song) },
-                onClickDelete = { onDeleteClick(song) }
-            )
+                onClickDelete = { onDeleteClick(song) })
         }
     }
 }
@@ -229,49 +230,39 @@ fun ShowSongList(
         }
     }
 }
+
 @Composable
 fun EditSongDialog(
-    song: Song,
-    onDismiss: () -> Unit,
-    onSave: (Song) -> Unit
+    song: Song, onDismiss: () -> Unit, onSave: (Song) -> Unit
 ) {
     var name by remember { mutableStateOf(song.name) }
     var author by remember { mutableStateOf(song.author) }
     var transcribedBy by remember { mutableStateOf(song.transcribedBy) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = song.name) },
-        text = {
-            EditSongFields(
-                name = name,
-                author = author,
-                transcribedBy = transcribedBy,
-                onNameChange = { name = it },
-                onAuthorChange = { author = it },
-                onTranscribedByChange = { transcribedBy = it }
-            )
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("取消")
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                onSave(song.copy(name = name, author = author, transcribedBy = transcribedBy))
-            }) {
-                Text("保存")
-            }
+    AlertDialog(onDismissRequest = onDismiss, title = { Text(text = song.name) }, text = {
+        EditSongFields(
+            name = name,
+            author = author,
+            transcribedBy = transcribedBy,
+            onNameChange = { name = it },
+            onAuthorChange = { author = it },
+            onTranscribedByChange = { transcribedBy = it })
+    }, dismissButton = {
+        TextButton(onClick = onDismiss) {
+            Text("取消")
         }
-    )
+    }, confirmButton = {
+        TextButton(onClick = {
+            onSave(song.copy(name = name, author = author, transcribedBy = transcribedBy))
+        }) {
+            Text("保存")
+        }
+    })
 }
 
 @Composable
 fun DeleteSongDialog(
-    song: Song,
-    onDismiss: () -> Unit,
-    onConfirmDelete: () -> Unit
+    song: Song, onDismiss: () -> Unit, onConfirmDelete: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -286,9 +277,9 @@ fun DeleteSongDialog(
             TextButton(onClick = onDismiss) {
                 Text("取消")
             }
-        }
-    )
+        })
 }
+
 @Composable
 fun EditSongFields(
     name: String,

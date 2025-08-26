@@ -11,16 +11,20 @@ import me.mm.sky.auto.music.ui.homepage.HomeScreenPage
 import me.mm.sky.auto.music.ui.setting.SettingScreenPage
 
 @Composable
-fun MyNavHost(navHostController: NavHostController,modifier: Modifier) {
-    NavHost(navController = navHostController,modifier=modifier, startDestination = HomeScreen.HOME.route){
-        composable(HomeScreen.HOME.route){
-            HomeScreenPage(modifier = modifier)
-        }
-        composable(HomeScreen.MUSIC.route){
-            MusicScreenPage(modifier = modifier)
-        }
-        composable(HomeScreen.SETTINGS.route){
-            SettingScreenPage(modifier = modifier)
+fun MyNavHost(
+    navHostController: NavHostController,
+    modifier: Modifier = Modifier
+) {
+    androidx.navigation.compose.NavHost(
+        navController = navHostController,
+        startDestination = HomeScreen.HOME.route,
+        modifier = modifier
+    ) {
+        HomeScreen.entries.forEach { screen ->
+            composable(screen.route) {
+                // 传入 navController 给页面
+                screen.context(navHostController)()
+            }
         }
     }
 }

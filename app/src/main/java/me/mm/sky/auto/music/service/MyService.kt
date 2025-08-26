@@ -231,7 +231,7 @@ class MyService : AccessibilityService() {
     }
 
     private fun handleAppChanged(event: AccessibilityEvent?) {
-        if (!SettingObserve.autoHideEnabled) return
+        if (!SettingObserve.isAutoHideEnabled()) return
 
         val rootNode = event?.source ?: return
         val windowPackageName = rootNode.packageName ?: return

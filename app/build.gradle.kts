@@ -14,14 +14,14 @@ android {
         minSdk = 24
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -34,6 +34,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
     buildFeatures {
         compose = true
@@ -48,6 +49,7 @@ dependencies {
     implementation ("com.github.princekin-f:EasyFloat:2.0.4")
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.foundation)
+    implementation(libs.androidx.navigation.runtime.ktx)
 
     val room_version = "2.7.2"
     implementation("androidx.room:room-runtime:$room_version")
@@ -62,6 +64,9 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.36.0")
+
+    implementation(libs.ktor.client.core)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

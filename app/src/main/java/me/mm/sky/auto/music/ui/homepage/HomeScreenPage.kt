@@ -28,6 +28,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -40,6 +41,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,10 +50,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import kotlinx.coroutines.launch
 import me.mm.sky.auto.music.context.MyContext.Companion.context
 import me.mm.sky.auto.music.floatwin.FloatSateEnum
 import me.mm.sky.auto.music.floatwin.FloatViewModel
@@ -59,6 +65,8 @@ import me.mm.sky.auto.music.ui.data.MainActivityViewModel
 import me.mm.sky.auto.music.ui.data.PermissionData
 import me.mm.sky.auto.music.ui.data.PermissionRepository
 import me.mm.sky.auto.music.context.MyContext.Companion.viewModel
+import me.mm.sky.auto.music.ui.HomeScreen
+
 @SuppressLint("IntentWithNullActionLaunch")
 fun joinQQGroup(context: Context, key: String): Boolean {
     val intent = Intent().apply {
@@ -77,32 +85,39 @@ fun joinQQGroup(context: Context, key: String): Boolean {
 }
 
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenPage(
-    modifier: Modifier = Modifier, data: String = ""
+    navController: NavHostController,
+    modifier: Modifier = Modifier,
+    data: String = ""
 ) {
-    val mainScreenViewModel: MainActivityViewModel = viewModel()
-    val uiState = mainScreenViewModel.uiState.collectAsState().value
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
-    Scaffold(modifier = Modifier, topBar = {
-        TopAppBar(modifier = Modifier.fillMaxWidth(), actions = {
-            IconButton(onClick = {
-                joinQQGroup(context, "B88m46-ejo-5e-Wtr-qgbdTlEVoWJHIK")
-            }) {
-                Icon(Icons.Outlined.Group, contentDescription = "加群")
-            }
-        }, title = {
-            Text(
-                text = stringResource(id = uiState.currentScreen.title),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+    val currentScreen = HomeScreen.entries.find { it.route == currentRoute } ?: HomeScreen.HOME
 
-                )
-        })
-    }) { padding ->
-
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                modifier = Modifier.fillMaxWidth(),
+                actions = {
+                    IconButton(onClick = {
+                        joinQQGroup(context, "B88m46-ejo-5e-Wtr-qgbdTlEVoWJHIK")
+                    }) {
+                        Icon(Icons.Outlined.Group, contentDescription = "加群")
+                    }
+                },
+                title = {
+                    Text(
+                        text = stringResource(id = currentScreen.title),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            )
+        }
+    ) { padding ->
         Column(
             modifier = modifier
                 .padding(padding)
@@ -110,12 +125,12 @@ fun HomeScreenPage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             HomeScreen()
-
             Spacer(modifier = Modifier.padding(top = 10.dp))
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActionCard(permissionData: PermissionData, onClick: () -> Unit) {
     Card(
@@ -126,6 +141,8 @@ fun ActionCard(permissionData: PermissionData, onClick: () -> Unit) {
                     if (permissionData.granted) Color(rgb(102, 187, 106)) else Color(rgb(255, 87, 34))
                 )*/
     ) {
+        val tooltipState = rememberTooltipState()
+        val coroutineScope = rememberCoroutineScope()
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -150,10 +167,38 @@ fun ActionCard(permissionData: PermissionData, onClick: () -> Unit) {
                     .weight(1f)
                     .padding(8.dp)
             ) {
-                Text(
-                    text = permissionData.name,
-                    fontSize = MaterialTheme.typography.titleMedium.fontSize
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = permissionData.name,
+                        fontSize = MaterialTheme.typography.titleMedium.fontSize
+                    )
+                    TooltipBox(
+                        positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+                        tooltip = {
+                            RichTooltip {
+                                Text(permissionData.description)
+                            }
+                        },
+                        state = tooltipState,
+                    ) {
+                        IconButton(
+                            onClick = {
+                                coroutineScope.launch {
+                                    tooltipState.show()
+                                }
+                            },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Info,
+                                contentDescription = "详情",
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
                 Text(
                     text = permissionData.description,
                     fontSize = MaterialTheme.typography.bodySmall.fontSize,
@@ -336,20 +381,17 @@ fun StartCard(cardData: StartCardData) {
                 Text(cardData.des, fontSize = 15.sp, color = cardData.textColor)
             }
             TooltipBox(
-                positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
                 tooltip = {
-                    Surface(
-                        shape = MaterialTheme.shapes.medium,
-                        color = MaterialTheme.colorScheme.surfaceContainer,
-                        tonalElevation = 15.dp,
-                        modifier = Modifier.padding(20.dp, 0.dp)
+                    RichTooltip(
+                        title = { Text("详情") },
+                        caretSize = DpSize(16.dp, 8.dp)
                     ) {
                         cardData.details()
                     }
                 },
-                state = tooltipState,
-
-                ) {
+                state = tooltipState
+            ) {
                 Icon(
                     imageVector = Icons.Outlined.Info,
                     contentDescription = "详情",
@@ -357,7 +399,6 @@ fun StartCard(cardData: StartCardData) {
                     modifier = Modifier.size(20.dp)
                 )
             }
-
         }
     }
 }
