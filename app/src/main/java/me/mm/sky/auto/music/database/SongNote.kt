@@ -2,7 +2,9 @@ package me.mm.auto.audio.list.database
 
 import android.util.Log
 import androidx.room.Ignore
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class SongNote(
     val time: Int,
     val key: String

@@ -27,6 +27,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
+import androidx.core.content.edit
 
 
 class MyContext : Application() {
@@ -67,56 +68,24 @@ class MyContext : Application() {
         }
 
         fun editBoolean(key: String, value: Boolean) {
-            context.getSharedPreferences("data", MODE_PRIVATE).edit().putBoolean(key, value).apply()
+            context.getSharedPreferences("data", MODE_PRIVATE).edit { putBoolean(key, value) }
         }
 
         fun getBoolean(key: String, defValue: Boolean): Boolean {
             return context.getSharedPreferences("data", MODE_PRIVATE).getBoolean(key, defValue)
         }
 
-        fun editString(key: String, value: String) {
-            context.getSharedPreferences("data", MODE_PRIVATE).edit().putString(key, value).apply()
-        }
 
-        fun getString(key: String, defValue: String): String {
-            return context.getSharedPreferences("data", MODE_PRIVATE).getString(key, defValue)
-                ?: defValue
-        }
 
         fun editInt(key: String, value: Int) {
-            context.getSharedPreferences("data", MODE_PRIVATE).edit().putInt(key, value).apply()
+            context.getSharedPreferences("data", MODE_PRIVATE).edit { putInt(key, value) }
         }
 
         fun getInt(key: String, defValue: Int): Int {
             return context.getSharedPreferences("data", MODE_PRIVATE).getInt(key, defValue)
         }
 
-        fun getIsNotificationGranted(): Boolean {
-            return NotificationManagerCompat.from(context).areNotificationsEnabled()
-        }
 
-        fun getIsFloatWindowGranted(): Boolean {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val appOpsMgr =
-                    context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-                val mode = appOpsMgr.checkOpNoThrow(
-                    "android:system_alert_window", android.os.Process.myUid(), context
-                        .packageName
-                )
-                mode == AppOpsManager.MODE_ALLOWED || mode == AppOpsManager.MODE_IGNORED
-            } else {
-                Settings.canDrawOverlays(context)
-            }
-
-        }
-
-        fun isAccessibilityEnabled(): Boolean {
-            val enabledServices = Settings.Secure.getString(
-                context.contentResolver,
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-            )
-            return enabledServices?.contains(context.packageName) == true
-        }
         fun hideTask(exclude: Boolean) {
             val activityManager =
                 context.getSystemService(ACTIVITY_SERVICE) as ActivityManager

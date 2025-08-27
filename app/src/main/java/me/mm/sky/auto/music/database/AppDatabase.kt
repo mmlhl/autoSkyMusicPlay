@@ -31,34 +31,31 @@ abstract class AppDatabase : RoomDatabase() {
                 Log.d("AppDatabase", "开始数据迁移：准备压缩现有 songNotes 数据")
 
                 try {
-                    // 创建新表，songNotes 字段设为可空
+                    // 创建新表，songNotes 和 updater 字段设为可空
                     db.execSQL("""
-                        CREATE TABLE IF NOT EXISTS songs_new (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                            name TEXT NOT NULL,
-                            author TEXT NOT NULL,
-                            transcribedBy TEXT NOT NULL,
-                            isComposed INTEGER NOT NULL,
-                            bpm INTEGER NOT NULL,
-                            bitsPerPage INTEGER NOT NULL,
-                            pitchLevel INTEGER NOT NULL,
-                            isEncrypted INTEGER NOT NULL,
-                            songNotes TEXT
-                        )
-                    """.trimIndent())
+                CREATE TABLE IF NOT EXISTS songs_new (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    name TEXT NOT NULL,
+                    author TEXT NOT NULL,
+                    transcribedBy TEXT NOT NULL,
+                    isComposed INTEGER NOT NULL,
+                    bpm INTEGER NOT NULL,
+                    bitsPerPage INTEGER NOT NULL,
+                    pitchLevel INTEGER NOT NULL,
+                    isEncrypted INTEGER NOT NULL,
+                    updater TEXT,
+                    songNotes TEXT
+                )
+            """.trimIndent())
 
-                    // 复制数据到新表，处理可能的 NULL 值
                     db.execSQL("""
-                        INSERT INTO songs_new (id, name, author, transcribedBy, isComposed, bpm, bitsPerPage, pitchLevel, isEncrypted, songNotes)
-                        SELECT id, name, author, transcribedBy, isComposed, bpm, bitsPerPage, pitchLevel, isEncrypted, 
-                               CASE WHEN songNotes = '' THEN NULL ELSE songNotes END
-                        FROM songs
-                    """.trimIndent())
+                INSERT INTO songs_new (id, name, author, transcribedBy, isComposed, bpm, bitsPerPage, pitchLevel, isEncrypted, updater, songNotes)
+                SELECT id, name, author, transcribedBy, isComposed, bpm, bitsPerPage, pitchLevel, isEncrypted, NULL, 
+                       CASE WHEN songNotes = '' THEN NULL ELSE songNotes END
+                FROM songs
+            """.trimIndent())
 
-                    // 删除旧表
                     db.execSQL("DROP TABLE songs")
-
-                    // 重命名新表
                     db.execSQL("ALTER TABLE songs_new RENAME TO songs")
 
                     Log.d("AppDatabase", "表结构迁移完成")

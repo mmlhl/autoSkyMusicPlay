@@ -25,6 +25,7 @@
 -keep class me.mm.sky.auto.music.context.MyContext{
 *;
 }
+#-keep class me.mm.sky.auto.music.net.** { *; }
 -keep class me.mm.sky.auto.music.service.MyService{
 *;
 }
