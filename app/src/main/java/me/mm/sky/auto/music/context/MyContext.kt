@@ -1,22 +1,18 @@
 package me.mm.sky.auto.music.context
 
 import android.app.ActivityManager
-import android.app.AppOpsManager
 import android.app.Application
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
-import androidx.core.app.NotificationManagerCompat
-import com.google.gson.Gson
-import com.google.gson.JsonParser
-import com.google.gson.JsonSyntaxException
+import androidx.core.content.edit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
 import me.mm.sky.auto.music.database.AppDatabase
 import me.mm.sky.auto.music.database.Song
 import me.mm.sky.auto.music.floatwin.FloatingWindowService
@@ -27,8 +23,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import androidx.core.content.edit
-
 
 class MyContext : Application() {
     companion object {
@@ -76,7 +70,6 @@ class MyContext : Application() {
         }
 
 
-
         fun editInt(key: String, value: Int) {
             context.getSharedPreferences("data", MODE_PRIVATE).edit { putInt(key, value) }
         }
@@ -95,8 +88,9 @@ class MyContext : Application() {
             }
         }
 
-        suspend fun files2Db( ) {
+        suspend fun files2Db() {
             withContext(Dispatchers.IO) {
+                val json = Json { ignoreUnknownKeys = true }
                 val songList = mutableListOf<Song>()
                 val songDao = database.songDao()
                 val filePath = context.getExternalFilesDirs(null).get(0)
@@ -104,25 +98,27 @@ class MyContext : Application() {
                 if (directory.exists() && directory.isDirectory) {
                     val files = directory.listFiles() ?: return@withContext
                     for (file in files) {
-                        Log.e("MyContext", "files2Db: "+file.name )
+                        Log.e("MyContext", "files2Db: ${file.name}")
                         if (file.isFile && file.extension == "txt") {
                             try {
                                 val strings = FileUtils.readTextFile(file.absolutePath)
-                                val jsonString=cleanJsonString(strings)
-//                                Log.e("MyContext", "files2Db: "+jsonString )
-                                val jsonArray = JsonParser.parseString(jsonString).asJsonArray
+                                val jsonString = cleanJsonString(strings)
+
+                                // 用 kotlinx.serialization 解析 JsonArray
+                                val jsonArray = json.parseToJsonElement(jsonString).jsonArray
                                 val firstElement = jsonArray[0]
-                                val song: Song = Gson().fromJson(firstElement, Song::class.java)
+
+                                // 直接反序列化
+                                val song: Song = json.decodeFromString(firstElement.toString())
+
                                 if (songDao.existSong(file.nameWithoutExtension) == 0) {
                                     song.name = file.nameWithoutExtension
                                     songList.add(song)
                                 }
                                 file.delete()
                             } catch (e: IOException) {
-                                // 处理读取文件时的 IO 异常
                                 Log.e("files2Db", "读取文件 ${file.name} 时出错: ${e.message}")
-                            } catch (e: JsonSyntaxException) {
-                                // 处理 JSON 解析异常
+                            } catch (e: Exception) {
                                 Log.e("files2Db", "解析文件 ${file.name} 时出错: ${e.message}")
                             }
                         }
@@ -141,7 +137,7 @@ class MyContext : Application() {
         super.onCreate()
         context = this
         database = AppDatabase.getInstance(context)
-        if (getBoolean("firstStart",true)){
+        if (getBoolean("firstStart", true)) {
             copyAssetsToPrivateStorage("sheets")
         }
         initKeyMap()
@@ -151,16 +147,18 @@ class MyContext : Application() {
         }
 
     }
+
     private fun initKeyMap() {
-        val x0=getInt("x0",0)
-        val y0=getInt("y0",0)
-        val x1=getInt("x1",0)
-        val y1=getInt("y1",0)
-        if (x0==0||y0==0||x1==0||y1==0){
+        val x0 = getInt("x0", 0)
+        val y0 = getInt("y0", 0)
+        val x1 = getInt("x1", 0)
+        val y1 = getInt("y1", 0)
+        if (x0 == 0 || y0 == 0 || x1 == 0 || y1 == 0) {
             return
         }
-        Key.init(x0,y0,x1,y1)
+        Key.init(x0, y0, x1, y1)
     }
+
     private fun copyAssetsToPrivateStorage(assetsSubdirectory: String) {
         try {
             val assetFiles = assets.list(assetsSubdirectory) ?: emptyArray()
@@ -179,7 +177,7 @@ class MyContext : Application() {
                     }
                 }
             }
-            editBoolean("firstStart",false)
+            editBoolean("firstStart", false)
         } catch (e: IOException) {
             Log.e("MainActivity", "复制 assets 文件时出错: ${e.message}")
         }

@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id ("com.google.devtools.ksp")
-    kotlin("plugin.serialization") version "2.2.10"
+    kotlin("plugin.serialization")
 }
 
 android {
@@ -14,8 +14,8 @@ android {
         applicationId = "me.mm.sky.auto.music"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.5"
+        versionCode = 2
+        versionName = "1.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -46,7 +46,6 @@ dependencies {
 
     implementation ("io.github.petterpx:floatingx:2.3.5")
     implementation ("io.github.petterpx:floatingx-compose:2.3.5")
-    implementation ("com.google.code.gson:gson:2.13.1")
     implementation ("com.github.princekin-f:EasyFloat:2.0.4")
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.foundation)
